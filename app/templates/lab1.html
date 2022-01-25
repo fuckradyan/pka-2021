@@ -1,99 +1,98 @@
-{% extends 'index.html' %}
-{% block content %}
+{% extends 'index.html' %} {% block content %}
 <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Атбаш</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Шифр Цезаря</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Квадрат Полибия</button>
-  </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">Атбаш</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Шифр Цезаря</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" data-bs-target="#pills-contact" type="button" role="tab" aria-controls="pills-contact" aria-selected="false">Квадрат Полибия</button>
+    </li>
 </ul>
 <div class="tab-content" id="pills-tabContent">
-  <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label for="exampleFormControlTextarea1" class="form-label">Исходный текст</label>
-                <textarea class="form-control" rows="4" id="lab1_1_mes"></textarea>
-            </div>
-        </div>
-        <div class="col-md-6">
-         <div class="row">
-            <div class="mb-3">
-                <label for="exampleFormControlTextarea1" class="form-label">Зашифрованный текст</label>
-                <textarea class="form-control"  rows="1" disabled id="lab1_1_enc"></textarea>
-            </div>
-         </div>
-         <div class="row">
-            <div class="mb-3">
-                    <label for="exampleFormControlTextarea1" class="form-label">Расшифрованный текст</label>
-                    <textarea class="form-control"  rows="1" disabled id="lab1_1_dec"></textarea>
-                </div>
-            </div>
-        </div>
-    </div>
-  <button type="button" id='lab1_1' class="btn btn-outline-dark btn-md">Зашифровать</button>
-  </div>
-  <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
-  <div class="row">
-  <div class="col-md-6">
-  <div class="mb-3">
-  <label for="exampleFormControlTextarea1" class="form-label">Исходный текст</label>
-  <textarea class="form-control"  rows="4" id='lab1_2_mes'></textarea>
-    </div>
-  </div>
-  <div class="col-md-6">
-   <div class="mb-3">
-        <label for="exampleFormControlTextarea1" class="form-label">Зашифрованный текст</label>
-        <textarea class="form-control" id="lab1_2_enc" rows="1" disabled></textarea>
-    </div>
-    <div class="row">
+    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+        <div class="row">
+            <div class="col-md-6">
                 <div class="mb-3">
-                    <label for="exampleFormControlTextarea1" class="form-label">Расшифрованный текст</label>
-                    <textarea class="form-control" id="lab1_2_dec" rows="1" disabled></textarea>
+                    <label for="exampleFormControlTextarea1" class="form-label">Исходный текст</label>
+                    <textarea class="form-control" rows="4" id="lab1_1_mes"></textarea>
                 </div>
             </div>
-  </div>
-  </div>
-  <div class="row"> 
-  <div class= "col-md-1">
-  <label for="exampleInputEmail1" class="form-label">ключ</label>
-  <input type="email" class="form-control" id="lab1_2_step" aria-describedby="emailHelp">
-  </div>
-  </div>
-  <br>
-  <button type="button" id='lab1_2' class="btn btn-outline-dark btn-md">Зашифровать</button>
-  </div>
-
-
-
-  <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
-    <div class="row">
-        <div class="col-md-6">
-            <div class="mb-3">
-                <label for="exampleFormControlTextarea1" class="form-label">Исходный текст</label>
-                <textarea class="form-control" id="lab1_3_mes" rows="4"></textarea>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="mb-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Зашифрованный текст</label>
+                        <textarea class="form-control" rows="1" disabled id="lab1_1_enc"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="mb-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Расшифрованный текст</label>
+                        <textarea class="form-control" rows="1" disabled id="lab1_1_dec"></textarea>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="row">
+        <button type="button" id='lab1_1' class="btn btn-outline-dark btn-md">Зашифровать</button>
+    </div>
+    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">Исходный текст</label>
+                    <textarea class="form-control" rows="4" id='lab1_2_mes'></textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
                 <div class="mb-3">
                     <label for="exampleFormControlTextarea1" class="form-label">Зашифрованный текст</label>
-                    <textarea class="form-control" id="lab1_3_enc" rows="1" disabled></textarea>
+                    <textarea class="form-control" id="lab1_2_enc" rows="1" disabled></textarea>
                 </div>
-            </div>
-            <div class="row">
-                <div class="mb-3">
-                    <label for="exampleFormControlTextarea1" class="form-label">Расшифрованный текст</label>
-                    <textarea class="form-control" id="lab1_3_dec" rows="1" disabled></textarea>
+                <div class="row">
+                    <div class="mb-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Расшифрованный текст</label>
+                        <textarea class="form-control" id="lab1_2_dec" rows="1" disabled></textarea>
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-1">
+                <label for="exampleInputEmail1" class="form-label">ключ</label>
+                <input type="email" class="form-control" id="lab1_2_step" aria-describedby="emailHelp">
+            </div>
+        </div>
+        <br>
+        <button type="button" id='lab1_2' class="btn btn-outline-dark btn-md">Зашифровать</button>
     </div>
-    <button type="button" id='lab1_3' class="btn btn-outline-dark btn-md">Зашифровать</button>
-  </div>
+
+
+
+    <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">Исходный текст</label>
+                    <textarea class="form-control" id="lab1_3_mes" rows="4"></textarea>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="mb-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Зашифрованный текст</label>
+                        <textarea class="form-control" id="lab1_3_enc" rows="1" disabled></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="mb-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Расшифрованный текст</label>
+                        <textarea class="form-control" id="lab1_3_dec" rows="1" disabled></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="button" id='lab1_3' class="btn btn-outline-dark btn-md">Зашифровать</button>
+    </div>
 </div>
 {% endblock %}
