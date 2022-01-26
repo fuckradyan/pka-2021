@@ -379,11 +379,24 @@ window.onload = function() {
         Cardan($('#lab4_2_mes').val());
     });
     $('#lab5_1').click(function() {
-        Shennon($('#lab5_1_mes').val());
+        Shennon($('#lab5_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
     });
     $('#lab5_2').click(function() {
-        Gost89($('#lab5_2_mes').val());
+        Gost89($('#lab5_2_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
     });
+    $('#lab6_1').click(function() {
+        A51($('#lab6_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
+    });
+    $('#lab7_1').click(function() {
+        Kuznechik($('#lab7_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
+    });
+    $('#lab7_2').click(function() {
+        Magma($('#lab7_2_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
+    });
+    $('#lab8_1').click(function() {
+        RSA($('#lab8_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''), $('#lab8_1_p').val(), $('#lab8_1_q').val());
+    });
+
 
 }
 
@@ -677,5 +690,48 @@ function Gost89(msg) {
         $('#lab5_2_enc').val(this.response[0]);
         $('#lab5_2_dec').val(this.response[1]);
 
+    })
+}
+
+function A51(msg) {
+    url = `${window.location.origin}` + '/lab6a51' + `?msg=${msg}`;
+    sendRequest(url, 'GET', function() {
+        console.log(this.response)
+        $('#lab6_1_enc').val(this.response[0]);
+        $('#lab6_1_dec').val(this.response[1]);
+
+    })
+}
+
+function Kuznechik(msg) {
+    url = `${window.location.origin}` + '/lab7kuznechik' + `?msg=${msg}`;
+    sendRequest(url, 'GET', function() {
+        console.log(this.response)
+
+    })
+}
+
+
+function Magma(msg) {
+    url = `${window.location.origin}` + '/lab7Magma' + `?msg=${msg}`;
+    sendRequest(url, 'GET', function() {
+        console.log(this.response)
+        $('#lab7_2_enc').val(this.response[0]);
+        $('#lab7_2_dec').val(this.response[1]);
+    })
+}
+
+
+function RSA(msg, p, q) {
+    url = `${window.location.origin}` + '/lab8rsa' + `?msg=${msg}` + `&p=${p}` + `&q=${q}`;
+    sendRequest(url, 'GET', function() {
+        console.log(this.response)
+        if (this.response == 'Ошибка.' || this.response == 'p и q не могут быть равны' || this.response == 'Оба числа должны быть простыми.') {
+            alert(this.response)
+            return
+        } else {
+            $('#lab8_1_enc').val(this.response[0]);
+            $('#lab8_1_dec').val(this.response[1]);
+        }
     })
 }

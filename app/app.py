@@ -9,6 +9,7 @@ import itertools
 import binascii
 import re
 import copy
+import collections
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
@@ -456,4 +457,536 @@ class GostCrypt(object):
 def lab6():
     return render_template('lab6.html')
 
+@app.route('/lab6a51',methods=['GET'])
+def lab6a51():
+    reg_x_length = 19
+    reg_y_length = 22
+    reg_z_length = 23
 
+    key_one = ""
+    reg_x = []
+    reg_y = []
+    reg_z = []
+    alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя "
+    
+    dict = {'.': 'тчк', ',': 'зпт', '!' : 'вск', '?' : 'впр'}
+    key = '0101001000011010110001110001100100101001000000110111111010110111'
+    to_encrypt = request.args.get('msg')
+    def replace_all_to(input_text, dict):
+        input_text = input_text.replace(' ', '')
+        for i, j in dict.items():
+            input_text = input_text.replace(i, j)
+        return input_text
+
+
+    def replace_all_from(input_text, dict):
+        for i, j in dict.items():
+            input_text = input_text.replace(j, i)
+        return input_text
+
+
+    def input_for_cipher_short():
+        return replace_all_to(to_encrypt, dict)
+
+    def output_from_decrypted(decrypted_text):
+        return replace_all_from(decrypted_text, dict)
+    def loading_registers(key):
+        i = 0
+        while(i < reg_x_length):
+            reg_x.insert(i, int(key[i]))
+            i = i + 1
+        j = 0
+        p = reg_x_length
+        while(j < reg_y_length):
+            reg_y.insert(j, int(key[p]))
+            p = p + 1
+            j = j + 1
+        k = reg_y_length + reg_x_length
+        r = 0
+        while(r < reg_z_length):
+            reg_z.insert(r, int(key[k]))
+            k = k + 1
+            r = r + 1
+
+
+    def set_key(key):
+        if(len(key) == 64 and re.match("^([01])+", key)):
+            key_one = key
+            loading_registers(key)
+            return True
+        return False
+
+
+    def get_key():
+        return key_one
+
+
+    def to_binary(plain):
+        s = ""
+        i = 0
+        for i in plain:
+            binary = str(' '.join(format(ord(x), 'b') for x in i))
+            j = len(binary)
+            while(j < 12):
+                binary = "0" + binary
+                s = s + binary
+                j = j + 1
+        binary_values = []
+        k = 0
+        while(k < len(s)):
+            binary_values.insert(k, int(s[k]))
+            k = k + 1
+        return binary_values
+
+
+    def get_majority(x, y, z):
+        if(x + y + z > 1):
+            return 1
+        else:
+            return 0
+
+
+    def get_keystream(length):
+        reg_x_temp = copy.deepcopy(reg_x)
+        reg_y_temp = copy.deepcopy(reg_y)
+        reg_z_temp = copy.deepcopy(reg_z)
+        keystream = []
+        i = 0
+        while i < length:
+            majority = get_majority(reg_x_temp[8], reg_y_temp[10], reg_z_temp[10])
+            if reg_x_temp[8] == majority:
+                new = reg_x_temp[13] ^ reg_x_temp[16] ^ reg_x_temp[17] ^ reg_x_temp[18]
+                reg_x_temp_two = copy.deepcopy(reg_x_temp)
+                j = 1
+                while(j < len(reg_x_temp)):
+                    reg_x_temp[j] = reg_x_temp_two[j-1]
+                    j = j + 1
+                reg_x_temp[0] = new
+
+            if reg_y_temp[10] == majority:
+                new_one = reg_y_temp[20] ^ reg_y_temp[21]
+                reg_y_temp_two = copy.deepcopy(reg_y_temp)
+                k = 1
+                while(k < len(reg_y_temp)):
+                    reg_y_temp[k] = reg_y_temp_two[k-1]
+                    k = k + 1
+                reg_y_temp[0] = new_one
+
+            if reg_z_temp[10] == majority:
+                new_two = reg_z_temp[7] ^ reg_z_temp[20] ^ reg_z_temp[21] ^ reg_z_temp[22]
+                reg_z_temp_two = copy.deepcopy(reg_z_temp)
+                m = 1
+                while(m < len(reg_z_temp)):
+                    reg_z_temp[m] = reg_z_temp_two[m-1]
+                    m = m + 1
+                reg_z_temp[0] = new_two
+
+            keystream.insert(i, reg_x_temp[18] ^ reg_y_temp[21] ^ reg_z_temp[22])
+            i = i + 1
+        return keystream
+
+
+    def convert_binary_to_str(binary):
+        s = ""
+        length = len(binary) - 12
+        i = 0
+        while(i <= length):
+            s = s + chr(int(binary[i:i+12], 2))
+            i = i + 12
+        return str(s)
+
+
+    def encode(plain):
+        s = ""
+        binary = to_binary(plain)
+        keystream = get_keystream(len(binary))
+        i = 0
+        while(i < len(binary)):
+            s = s + str(binary[i] ^ keystream[i])
+            i = i + 1
+        return s
+
+
+    def decode(cipher):
+        s = ""
+        binary = []
+        keystream = get_keystream(len(cipher))
+        i = 0
+        while(i < len(cipher)):
+            binary.insert(i, int(cipher[i]))
+            s = s + str(binary[i] ^ keystream[i])
+            i = i + 1
+        return convert_binary_to_str(str(s))
+
+    set_key(key)
+    return jsonify(encode(input_for_cipher_short()),output_from_decrypted(decode(encode(input_for_cipher_short()))))
+
+
+@app.route('/lab7',methods=['GET'])
+def lab7():
+    return render_template('lab7.html')
+
+
+@app.route('/lab7kuznechik',methods=['GET'])
+def lab7kuznechik():
+    alphabet_lower = {'а':0, 'б':1, 'в':2, 'г':3, 'д':4,
+                  'е':5, 'ж':6, 'з':7, 'и':8, 'й':9,
+                  'к':10, 'л':11, 'м':12, 'н':13, 'о':14,
+                  'п':15, 'р':16, 'с':17, 'т':18, 'у':19,
+                  'ф':20, 'х':21, 'ц':22, 'ч':23, 'ш':24,
+                  'щ':25, 'ъ':26, 'ы':27, 'ь':28, 'э':29,
+                  'ю':30, 'я':31, ' ':32, ",":33, ".":34
+                  }
+
+#хэшируем сообщение
+    msg = request.args.get('msg')
+    msg_list = list(msg)
+    alpha_code_msg = list()
+    for i in range(len(msg_list)):
+        alpha_code_msg.append(int(alphabet_lower.get(msg_list[i])))
+    print("Длина исходного сообщения {} символов".format(len(alpha_code_msg)))
+    def hash_value(mod,alpha_code):
+        i = 0
+        hashing_value = 1
+        while i < len(alpha_code_msg):
+            hashing_value = (((hashing_value-1) + int(alpha_code_msg[i]))**2) % curve.p
+            i += 1
+        return hashing_value
+
+    #класс точки, нужен для хранения точек и вывода их
+    class Point:
+        def __init__(self,x_init,y_init):
+            self.x = x_init
+            self.y = y_init
+
+        def shift(self, x, y):
+            self.x += x
+            self.y += y
+
+        def __repr__(self):
+            return "".join(["( x=", str(self.x), ", y=", str(self.y), ")"])
+
+    x_1=0 #магические переменные, которые хранят координаты точки Q
+    y_1=0 #магические переменные, которые хранят координаты точки Q
+    EllipticCurve = collections.namedtuple('EllipticCurve', 'name p q_mod a b q g n h') #тюпл(статичный массив, именной, хранит переменные(параметры эк))
+    curve = EllipticCurve(
+        'secp256k1',
+        #параметры поля
+        #модуль поля
+        p=0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f,
+        q_mod = 0xfffffffffefffffffffcfffffffffffcfffffffffffffffffffffffefffffc2f,
+        #коэфф а и b
+        a=7,
+        b=11,
+        #Базовая точка эк записано в hex
+        g=(0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
+        0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8),
+        q=(0xA0434D9E47F3C86235477C7B1AE6AE5D3442D49B1943C2B752A68E2A47E247C7,
+        0x893ABA425419BC27A3B6C7E693A24C696F794C2ED877A1593CBEE53B037368D7),
+        #Подгруппа группы точек
+        n=0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141,
+        #Подгруппа
+        h=1,
+    )
+    print("Q mod",int(curve.q_mod))
+    print("P mod",int(curve.p))
+    def is_on_curve(point):
+        """Возвращает True если точка лежит на элиптической кривой."""
+        if point is None:
+            return True
+
+        x, y = point
+
+        return (y * y - x * x * x - curve.a * x - curve.b) % curve.p == 0
+
+    def point_neg(point):
+        """Инвертирует точку по оси y -point."""
+        #assert is_on_curve(point)
+
+        if point is None:
+            # -0 = 0
+            return None
+
+        x, y = point
+        result = (x, -y % curve.p)
+
+        #assert is_on_curve(result)
+
+        return result
+
+    def inverse_mod(k, p):
+        """Возвращает обратное k по модулю p.
+        Эта функция возвращает число x удовлетворяющее условию (x * k) % p == 1.
+        k не должно быть равно 0 и p должно быть простым.
+        """
+        if k == 0:
+            raise ZeroDivisionError('деление на 0')
+
+        if k < 0:
+            # k ** -1 = p - (-k) ** -1  (mod p)
+            return p - inverse_mod(-k, p)
+
+        # Раширенный алгоритм Евклида.
+        s, old_s = 0, 1
+        t, old_t = 1, 0
+        r, old_r = p, k
+
+        while r != 0:
+            quotient = old_r // r
+            old_r, r = r, old_r - quotient * r
+            old_s, s = s, old_s - quotient * s
+            old_t, t = t, old_t - quotient * t
+
+        gcd, x, y = old_r, old_s, old_t
+
+        assert gcd == 1
+        assert (k * x) % p == 1
+
+        return x % p
+
+    def point_add(point1, point2):
+        """Возвращает результат операции сложения point1 + point2 оперируя законами операции над группами."""
+        #assert is_on_curve(point1)
+        #assert is_on_curve(point2)
+
+        if point1 is None:
+            # 0 + point2 = point2
+            return point2
+        if point2 is None:
+            # point1 + 0 = point1
+            return point1
+
+        x1, y1 = point1
+        x2, y2 = point2
+
+        if x1 == x2 and y1 != y2:
+            # point1 + (-point1) = 0
+            return None
+
+        if x1 == x2:
+            # This is the case point1 == point2.
+            m = (3 * x1 * x1 + curve.a) * inverse_mod(2 * y1, curve.p)
+        else:
+            # This is the case point1 != point2.
+            m = (y1 - y2) * inverse_mod(x1 - x2, curve.p)
+
+        x3 = m * m - x1 - x2
+        y3 = y1 + m * (x3 - x1)
+        result = (x3 % curve.p,
+                -y3 % curve.p)
+
+        #assert is_on_curve(result)
+
+        return result
+
+    def scalar_mult(k, point):
+        """Возвращает k * точку используя дублирование и алгоритм сложения точек."""
+        #assert is_on_curve(point)
+
+        if k % curve.n == 0 or point is None:
+            return None
+
+        if k < 0:
+            # k * point = -k * (-point)
+            return scalar_mult(-k, point_neg(point))
+
+        result = None
+        addend = point
+
+        while k:
+            if k & 1:
+                # Add.
+                result = point_add(result, addend)
+
+            # Double.
+            addend = point_add(addend, addend)
+
+            k >>= 1
+
+        #assert is_on_curve(result)
+
+        return result
+
+    #Вывод хэш-значения
+    hash_code_msg = hash_value(curve.p, alpha_code_msg)
+    print("Хэш сообщения:={}".format(hash_code_msg))
+    #вычисляем е, обращаемся через тюпл к перемнной p
+    e = hash_code_msg%curve.q_mod
+    print("E={}".format(e))
+    #генерация k
+    k = random.randint(1,curve.q_mod)
+    print("K={}".format(k))
+    print("")
+    #нахождение точки элиптической кривой из базовый точки C=K * P(x,y)
+    d = 10
+    print("D={}".format(d))
+    x,y = scalar_mult(k,curve.g)
+    point_c = Point(x,y)
+    print("Point_C={}".format(point_c))
+    r = point_c.x % curve.q_mod
+    print("R={}".format(r))
+    s = (r*curve.p + k*e)%curve.q_mod
+    print("S={}".format(s))
+    #проверка подписи
+    v = inverse_mod(e,curve.p)
+    print("V={}".format(v))
+    z1 = (s*v)%curve.q_mod
+    z2 = ((curve.p-r)*v)%curve.q_mod
+    x_1,y_1 = scalar_mult(d,curve.g)
+    print("Point_Q=( x={}, y={} )".format(x_1,y_1))
+    point_c_new = Point(x,y)
+    x,y = point_add(scalar_mult(z1,curve.g),
+                    scalar_mult(z2,curve.q))
+    r_1 = point_c_new.x% curve.q_mod
+    print("R_new={}".format(r_1))
+    if r == r_1:
+        print("Подпись прошла проверку!")
+    else:
+        print("Ошибка проверки!")
+    return jsonify(2)
+
+
+@app.route('/lab7Magma', methods=['GET'])
+def lab7Magma():
+    # импорт компонентов, необходимых для работы программы
+    pi0 = [12, 4, 6, 2, 10, 5, 11, 9, 14, 8, 13, 7, 0, 3, 15, 1]
+    pi1 = [6, 8, 2, 3, 9, 10, 5, 12, 1, 14, 4, 7, 11, 13, 0, 15]
+    pi2 = [11, 3, 5, 8, 2, 15, 10, 13, 14, 1, 7, 4, 12, 9, 6, 0]
+    pi3 = [12, 8, 2, 1, 13, 4, 15, 6, 7, 0, 10, 5, 3, 14, 9, 11]
+    pi4 = [7, 15, 5, 10, 8, 1, 6, 13, 0, 9, 3, 14, 11, 4, 2, 12]
+    pi5 = [5, 13, 15, 6, 9, 2, 12, 10, 11, 7, 8, 1, 4, 3, 14, 0]
+    pi6 = [8, 14, 2, 5, 6, 9, 1, 12, 15, 4, 11, 0, 13, 10, 3, 7]
+    pi7 = [1, 7, 14, 13, 0, 5, 8, 3, 4, 15, 10, 6, 9, 12, 11, 2]
+    pi = [pi0, pi1, pi2, pi3, pi4, pi5, pi6, pi7]
+    MASK32 = 2 ** 32 - 1
+    print ('Введите текст')
+    to_encrypt = request.args.get('msg')
+    def t(x):
+        y = 0
+        for i in reversed(range(8)):
+            j = (x >> 4 * i) & 0xf
+            y <<= 4
+            y ^= pi[i][j]
+        return y
+    # функция сдвига на 11
+    def rot11(x):
+        return ((x << 11) ^ (x >> (32 - 11))) & MASK32
+    def g(x, k):
+        return rot11(t((x + k) % 2 ** 32))
+    def split(x):
+        L = x >> 32
+        R = x & MASK32
+        return (L, R)
+    def join(L, R):
+        return (L << 32) ^ R
+    def magma_key_schedule(k):
+        keys = []
+        for i in reversed(range(8)):
+            keys.append((k >> (32 * i)) & MASK32)
+        for i in range(8):
+            keys.append(keys[i])
+        for i in range(8):
+            keys.append(keys[i])
+        for i in reversed(range(8)):
+            keys.append(keys[i])
+        return keys
+    # функция шифрования
+    def magma_encrypt(x, k):
+        keys = magma_key_schedule(k)
+        (L, R) = split(x)
+        for i in range(31):
+            (L, R) = (R, L ^ g(R, keys[i]))
+        return join(L ^ g(R, keys[-1]), R)
+    # функция расшифрования
+    def magma_decrypt(x, k):
+        keys = magma_key_schedule(k)
+        keys.reverse()
+        (L, R) = split(x)
+        for i in range(31):
+            (L, R) = (R, L ^ g(R, keys[i]))
+        return join(L ^ g(R, keys[-1]), R)
+    # установка ключа
+    key = int('ffeeddccbbaa99887766554433221100f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff', 16)
+    i = 0
+    text_short = to_encrypt
+    encr_short = []
+    while (i < len(text_short)):
+        text = text_short[i:i+4].encode().hex()
+        text = int(text, 16)
+        text = text % 2**64
+        pt = text
+        ct = magma_encrypt(pt, key)
+        encr_short.append(ct)
+        i += 4
+    decr_short = []
+    for i in encr_short:
+        dt = magma_decrypt(i, key)
+        decr_short.append(bytes.fromhex(hex(dt)[2::]).decode('utf-8'))
+    return jsonify(encr_short, ''.join(decr_short))
+
+
+
+@app.route('/lab8',methods=['GET'])
+def lab8():
+    return render_template('lab8.html')
+
+@app.route('/lab8rsa',methods=['GET'])
+def lab8rsa():
+    def gcd(a, b):
+        while b != 0:
+            a, b = b, a % b
+        return a
+
+    def multiplicative_inverse(e,r):
+        for i in range(r):
+            if((e*i)%r == 1):
+                return i
+
+    def is_prime(num):
+        if num == 2:
+            return True
+        if num < 2 or num % 2 == 0:
+            return False
+        for n in range(3, int(num**0.5)+2, 2):
+            if num % n == 0:
+                return False
+        return True
+
+    def generate_keypair(p, q):
+        if not (is_prime(p) and is_prime(q)):
+            return jsonify('Оба числа должны быть простыми.')
+        elif p == q:
+            return jsonify('p и q не могут быть равны')
+        #n = pq
+        n = p * q
+
+        phi = (p-1) * (q-1)
+
+        e = random.randrange(1, phi)
+
+        g = gcd(e, phi)
+        while g != 1:
+            e = random.randrange(1, phi)
+            g = gcd(e, phi)
+        d = multiplicative_inverse(e, phi)
+        return ((e, n), (d, n))
+
+    def encrypt(pk, plaintext):
+        key, n = pk
+        cipher = [(ord(char) ** key) % n for char in plaintext]
+        return cipher
+
+    def decrypt(pk, ciphertext):
+        key, n = pk
+        plain = [chr((char ** key) % n) for char in ciphertext]
+        return ''.join(plain)
+    try:
+        message = request.args.get('msg')
+        p = int(request.args.get('p'))
+        q = int(request.args.get('q'))
+        public, private = generate_keypair(p, q)
+        print("Публичный ключ: ", public ,"Секретный ключ: ", private)
+        encrypted_msg = encrypt(public, message)
+        return jsonify(''.join([str(x) for x in encrypted_msg]),decrypt(private, encrypted_msg))
+    except:
+        return jsonify('Ошибка.')
