@@ -1,0 +1,94 @@
+{% extends 'index.html' %} {% block content %}
+<ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+
+</ul>
+<div class="tab-content" id="pills-tabContent">
+    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Пользователь 1</h3>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Число a</label>
+                        <textarea class="form-control" rows="1" id="lab11_1_1"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Число n</label>
+                        <textarea class="form-control" rows="1" id="lab11_1_2"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Число Ka в промежутке (2,n-1)</label>
+                        <textarea class="form-control" rows="1" id="lab11_1_ka"></textarea>
+                    </div>
+                </div>
+                <br>
+                <button class="button btn btn-primary" id="lab11_1_btn1"> ввести</button>
+                <br>
+                <br>
+                <div id="hidden1" class="d-none">
+                    <p id="hidden1Ya"> </p>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="exampleFormControlTextarea1" class="form-label">Число, которое прислал собеседник</label>
+                            <textarea class="form-control" rows="1" id="lab11_1_3"></textarea>
+                        </div>
+                    </div>
+                    <br>
+                    <button class="button btn btn-primary" id="lab11_1_btn2"> ввести</button>
+                </div>
+
+                <p id="hidden1Ka"></p>
+
+            </div>
+            <div class="col-md-6">
+                <h3>Пользователь 2</h3>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Число a</label>
+                        <textarea class="form-control" rows="1" id="lab11_2_1"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Число n</label>
+                        <textarea class="form-control" rows="1" id="lab11_2_2"></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Число Ka в промежутке (2,n-1)</label>
+                        <textarea class="form-control" rows="1" id="lab11_2_ka"></textarea>
+                    </div>
+                </div>
+                <br>
+                <button class="button btn btn-primary" id="lab11_2_btn1"> ввести</button>
+                <br>
+                <br>
+                <div id="hidden2" class="d-none">
+                    <p id="hidden2Ya"> </p>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="exampleFormControlTextarea1" class="form-label">Число, которое прислал собеседник</label>
+                            <textarea class="form-control" rows="1" id="lab11_2_3"></textarea>
+                        </div>
+                    </div>
+                    <br>
+                    <button class="button btn btn-primary" id="lab11_2_btn2"> ввести</button>
+                </div>
+
+                <p id="hidden2Ka"></p>
+            </div>
+        </div>
+        <br>
+
+    </div>
+
+
+
+
+</div>
+{% endblock %}

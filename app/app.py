@@ -10,6 +10,10 @@ import binascii
 import re
 import copy
 import collections
+from math import gcd
+
+
+
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
@@ -932,6 +936,7 @@ def lab8():
 
 @app.route('/lab8rsa',methods=['GET'])
 def lab8rsa():
+    # НОД
     def gcd(a, b):
         while b != 0:
             a, b = b, a % b
@@ -941,7 +946,7 @@ def lab8rsa():
         for i in range(r):
             if((e*i)%r == 1):
                 return i
-
+    # Ф-ия определения простоты
     def is_prime(num):
         if num == 2:
             return True
@@ -951,7 +956,7 @@ def lab8rsa():
             if num % n == 0:
                 return False
         return True
-
+     #проверка чисел на простоту и генерация ключей (e,n) (d,n)
     def generate_keypair(p, q):
         if not (is_prime(p) and is_prime(q)):
             return jsonify('Оба числа должны быть простыми.')
@@ -970,12 +975,12 @@ def lab8rsa():
             g = gcd(e, phi)
         d = multiplicative_inverse(e, phi)
         return ((e, n), (d, n))
-
+    # шифрование
     def encrypt(pk, plaintext):
         key, n = pk
         cipher = [(ord(char) ** key) % n for char in plaintext]
         return cipher
-
+    # расшифровка
     def decrypt(pk, ciphertext):
         key, n = pk
         plain = [chr((char ** key) % n) for char in ciphertext]
@@ -990,3 +995,184 @@ def lab8rsa():
         return jsonify(''.join([str(x) for x in encrypted_msg]),decrypt(private, encrypted_msg))
     except:
         return jsonify('Ошибка.')
+    
+    
+@app.route('/lab9',methods=['GET'])
+def lab9():
+    return render_template('lab9.html')
+
+@app.route('/lab9dsrsa',methods=['GET'])
+def lab9dsrsa():
+    alphabet_lower = {'а':0, 'б':1, 'в':2, 'г':3, 'д':4,
+                  'е':5, 'ж':6, 'з':7, 'и':8, 'й':9,
+                  'к':10, 'л':11, 'м':12, 'н':13, 'о':14,
+                  'п':15, 'р':16, 'с':17, 'т':18, 'у':19,
+                  'ф':20, 'х':21, 'ц':22, 'ч':23, 'ш':24,
+                  'щ':25, 'ъ':26, 'ы':27, 'ь':28, 'э':29,
+                  'ю':30, 'я':31, ' ':32, ",":33, ".":34,
+                  }
+
+    #проверка на простое число
+    def IsPrime(n):
+        d = 2
+        while n % d != 0:
+            d += 1
+        return d == n
+    #расширенный алгоритм Евклида или (e**-1) mod fe
+    def modInverse(e,el):
+        e = e % el
+        for x in range(1,el):
+            if ((e * x) % el == 1):
+                return x
+        return 1
+
+    #инициализация p,q,e,n
+    p = int(request.args.get('p'))
+    print('p - простое число: ',IsPrime(p))
+    
+    q = int(request.args.get('q'))
+    print('q - простое число:',IsPrime(q))
+    n = p * q
+    print("N =",n)
+    el = (p-1) * (q-1)
+    print("El =",el)
+    e = random.randrange(1, el)
+    while gcd(e,el) != 1:
+        e = random.randrange(1, el)
+        gcd(e, el)
+    print("E =",e)
+    if gcd(e,el) == 1:
+        print("E подходит")
+    else:
+        print("False")
+    
+    #нахождение секретной экспоненты D
+    d = modInverse(e,el)
+    print("D =",d)
+    print("Открытый ключ e={} n={}".format(e,n))
+    print("Секретный ключ d={} n={}".format(d,n))
+    #хэширование сообщения
+    msg = request.args.get('msg')
+    msg_list = list(msg)
+    alpha_code_msg = list()
+    for i in range(len(msg_list)):
+        alpha_code_msg.append(int(alphabet_lower.get(msg_list[i])))
+    print("Длина исходного сообщения {} символов".format(len(alpha_code_msg)))
+    def hash_value(n,alpha_code):
+        i = 0
+        hashing_value = 1
+        while i < len(alpha_code_msg):
+            hashing_value = (((hashing_value-1) + int(alpha_code_msg[i]))**2) % n
+            i += 1
+            print ('Значение хэша №{}'.format(i),hashing_value)
+        return hashing_value
+
+    hash_code_msg = hash_value(n, alpha_code_msg)
+    print("Хэш сообщения", hash_code_msg)
+    #подпись сообщения s=Sa(m) = m^d mod n
+    def signature_msg(hash_code,n,d):
+        sign = (hash_code**d)%n
+        return sign
+
+    sign_msg = signature_msg(hash_code_msg,n,d)
+    print("Значение подписи: {}".format(sign_msg))
+    #передаём пару m,s
+    def check_signature(sign_msg, n,e):
+        check = (sign_msg**e) % n
+        return check
+
+    check_sign = check_signature(sign_msg,n,e)
+    print("Значение проверки подписи = {}".format(check_sign))
+    return jsonify(hash_code_msg, sign_msg, check_sign)
+
+@app.route('/lab10',methods=['GET'])
+def lab10():
+    return render_template('lab10.html')
+
+@app.route('/gost94',methods=['GET'])
+def gost94():
+
+    alphavit = {'а': 0, 'б': 1, 'в': 2, 'г': 3, 'д': 4,
+    'е': 5, 'ё': 6, 'ж': 7, 'з': 8, 'и': 9, 'й': 10,
+    'к': 11, 'л': 12, 'м': 13, 'н': 14, 'о': 15,
+    'п': 16, 'р': 17, 'с': 18, 'т': 19, 'у': 20,
+    'ф': 21, 'х': 22, 'ц': 23, 'ч': 24, 'ш': 25,
+    'щ': 26, 'ъ': 27, 'ы': 28, 'ь': 29, 'э': 30,
+    'ю': 31, 'я': 32, ' ':33
+    }
+    def ciphergostd(clearText):
+        array = []
+        flag = False
+        for s in range(50, 1000):
+            for i in range(2, s):
+                if s % i == 0:
+                    flag = True
+                    break
+            if flag == False:
+                array.append(s)
+            flag = False
+        p = 31
+        print("p = ", p)
+        q = 5
+        print("q = ", q)
+        a = 2
+        print("a =", a)
+        array2 = []
+        flag2 = False
+        for s in range(2, q):
+            for i in range(2, s):
+                if s % i == 0:
+                    flag2 = True
+                    break
+            if flag2 == False:
+                array2.append(s)
+            flag2 = False
+        x = 3
+        print("x = ", x)
+        y = a**x % p
+        k = 4
+        print("k = ", k)
+        #
+        r = (a**k % p) % q
+        msg = clearText
+        msg_list = list(msg)
+        alpha_code_msg = list()
+        for i in range(len(msg_list)):
+            alpha_code_msg.append(int(alphavit.get(msg_list[i])))
+        print("Длина исходного сообщения {} символов".format(len(alpha_code_msg)))
+        hash_code_msg = hash_value(p, alpha_code_msg)
+        print("Хэш сообщения = {}".format(hash_code_msg))
+        s = (x*r+k*hash_code_msg) % q
+        print("Цифровая подпись = ", r % (2**256), ",", s % (2**256))
+        v = (hash_code_msg**(q-2)) % q
+        z1 = s*v % q
+        z2 = ((q-r)*v) % q
+        u = (((a**z1)*(y**z2)) % p) % q
+        
+        if u == r:
+            print(r, " = ", u, 'следовательно')
+            res = "Подпись верна"
+            print("Подпись верна")
+        else:
+            print(r, "!= ", u, 'следовательно')
+            res ="Подпись неверна"
+            print("Подпись неверна")
+        return r % (2**256),s % (2**256),u,res
+    def hash_value(n, alpha_code):
+        i = 0
+        hash = 1
+        while i < len(alpha_code):
+            hash = (((hash-1) + int(alpha_code[i]))**2) % n
+            i += 1
+        return hash
+    msg = request.args.get('msg')
+    dict = {'.': 'тчк', ',': 'зпт', '!' : 'вск', '?' : 'впр'}
+    for i, j in dict.items():
+        msg = msg.replace(i, j)
+    
+    return jsonify(ciphergostd(msg))
+
+
+@app.route('/lab11',methods=['GET'])
+def lab11():
+    return render_template('lab11.html')

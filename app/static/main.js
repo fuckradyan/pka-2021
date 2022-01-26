@@ -379,22 +379,61 @@ window.onload = function() {
         Cardan($('#lab4_2_mes').val());
     });
     $('#lab5_1').click(function() {
-        Shennon($('#lab5_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
+        Shennon($('#lab5_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
     });
     $('#lab5_2').click(function() {
-        Gost89($('#lab5_2_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
+        Gost89($('#lab5_2_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
     });
     $('#lab6_1').click(function() {
-        A51($('#lab6_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
+        A51($('#lab6_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
     });
     $('#lab7_1').click(function() {
-        Kuznechik($('#lab7_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
+        Kuznechik($('#lab7_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
     });
     $('#lab7_2').click(function() {
-        Magma($('#lab7_2_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''));
+        Magma($('#lab7_2_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
     });
     $('#lab8_1').click(function() {
-        RSA($('#lab8_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', ''), $('#lab8_1_p').val(), $('#lab8_1_q').val());
+        RSA($('#lab8_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), $('#lab8_1_p').val(), $('#lab8_1_q').val());
+    });
+    $('#lab9_1').click(function() {
+        DSRSA($('#lab9_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase(), $('#lab9_1_p').val(), $('#lab9_1_q').val());
+    });
+    $('#lab10_1').click(function() {
+        gost94($('#lab10_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase());
+    });
+    $('#lab11_1_btn1').click(function() {
+        n1 = parseInt($('#lab11_1_2').val());
+        a1 = parseInt($('#lab11_1_1').val());
+        ka1 = parseInt($('#lab11_1_ka').val());
+        if (n1 > a1 && ka1 > 2 && ka1 < n1 - 1) {
+            $('#hidden1').removeClass('d-none');
+            $('#hidden1Ya').text('Ваш Ya = ' + a1 ** ka1 % n1)
+            Ya1 = a1 ** ka1 % n1;
+
+        } else {
+            alert('n должно быть больше a. 2 < Ka < n-1. Введите корректные значения')
+        }
+        $('#lab11_1_btn2').click(function() {
+            $('#hidden1Ka').text('Ваш общий ключ = ' + a1 ** (Ya1 * parseInt($('#lab11_1_3').val())) % n1)
+        });
+    });
+
+    $('#lab11_2_btn1').click(function() {
+        n2 = parseInt($('#lab11_2_2').val());
+        a2 = parseInt($('#lab11_2_1').val());
+        ka2 = parseInt($('#lab11_2_ka').val());
+        if (n2 > a2 && ka2 > 2 && ka2 < n2 - 1) {
+            $('#hidden2').removeClass('d-none');
+            $('#hidden2Ya').text('Ваш Ya = ' + a2 ** ka2 % n2)
+            Ya2 = a2 ** ka2 % n2;
+
+        } else {
+            alert('n должно быть больше a. 2 < Ka < n-1. Введите корректные значения')
+        }
+        $('#lab11_2_btn2').click(function() {
+            $('#hidden2Ka').text('Ваш общий ключ = ' + a2 ** (Ya2 * parseInt($('#lab11_2_3').val())) % n2)
+        });
     });
 
 
@@ -733,5 +772,26 @@ function RSA(msg, p, q) {
             $('#lab8_1_enc').val(this.response[0]);
             $('#lab8_1_dec').val(this.response[1]);
         }
+    })
+}
+
+function DSRSA(msg, p, q) {
+    url = `${window.location.origin}` + '/lab9dsrsa' + `?msg=${msg}` + `&p=${p}` + `&q=${q}`;
+    sendRequest(url, 'GET', function() {
+        console.log(this.response)
+        $('#lab9_1_1').val(this.response[0]);
+        $('#lab9_1_2').val(this.response[1]);
+        $('#lab9_1_3').val(this.response[2]);
+    })
+}
+
+function gost94(msg) {
+    url = `${window.location.origin}` + '/gost94' + `?msg=${msg}`;
+    sendRequest(url, 'GET', function() {
+        console.log(this.response)
+        $('#lab10_1_1').val(this.response[0]);
+        $('#lab10_1_2').val(this.response[1]);
+        $('#lab10_1_3').val(this.response[2]);
+        $('#lab10_1_4').val(this.response[3]);
     })
 }
