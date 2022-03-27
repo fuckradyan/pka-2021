@@ -35,6 +35,7 @@ def lab3():
 
 @app.route('/lab3Obr', methods = ['GET'])
 def lab3Obr():
+    # проверка матрицы на вырожденность
     try:
         matrix = request.args.get('matrix')
         matrix= matrix[1:len(matrix)-1]
@@ -45,20 +46,24 @@ def lab3Obr():
 
 @app.route('/lab3Umn', methods= ['GET'])
 def lab3Umn():
+    
     matrix1 = request.args.get('matrix1')
     matrix1= matrix1[1:len(matrix1)-1]
     matrix2 = request.args.get('matrix2')
     shape = request.args.get('shape')
     matrix2= matrix2[1:len(matrix2)-1]
+    # преобразование матриц в нужный тип
     ArrayMatrix1 = np.matrix(matrix1)
     ArrayMatrix2 = np.matrix(matrix2)
     ArrayMatrix3=[]
+    # умножение матриц для зашифровки
     for i in range (0,int(ArrayMatrix2.shape[0]),int(shape)):
         ArrayMatrix3+=(ArrayMatrix1*ArrayMatrix2[i:i+int(shape)]).tolist()
     return jsonify(ArrayMatrix3)
 
 @app.route('/lab3Umn1', methods= ['GET'])
 def lab3Umn1():
+    
     print(request.args)
     matrix1 = request.args.get('matrix1')
     matrix1= matrix1[1:len(matrix1)-1]
@@ -68,10 +73,12 @@ def lab3Umn1():
     print(matrix2)
     print(matrix1)
     print('```````````````')
+    # преобразование матриц в нужный тип
     shape = request.args.get('shape')
     ArrayMatrix1 = np.matrix(matrix1)
     ArrayMatrix2 = np.matrix(matrix2)
     ArrayMatrix3=[]
+    # умножение матриц для расшифрования
     for i in range (0,int(ArrayMatrix2.shape[0]),int(shape)):
         ArrayMatrix3+=(ArrayMatrix1*ArrayMatrix2[i:i+int(shape)]).round().tolist()
     return jsonify(ArrayMatrix3)
@@ -95,22 +102,24 @@ def lab4Enc():
     cipher = ""
 
     k_indx = 0
-
+    # количество символов в сообщении
     msg_len = float(len(to_encrypt))
     msg_lst = list(to_encrypt)
+    # столбцы из ключа
     key_lst = sorted(list(key))
-
+    # количество cтолбцов в матрице
     col = len(key)
-
+    # количество строк в матрице
     row = int(math.ceil(msg_len / col))
-
     fill_null = int((row * col) - msg_len)
+    # заполнение пустых клеток в матрице
     msg_lst.extend('_' * fill_null)
-
+    # составление матрицы
     matrix = [msg_lst[i: i + col] for i in range(0, len(msg_lst), col)]
-
+    # составление зашифрованного сообщения по матрице
     for _ in range(col):
         curr_idx = key.index(key_lst[k_indx])
+        # к итоговой фразе прибавляется буква из каждой строки с номером текущего столбца
         cipher += ''.join([row[curr_idx] for row in matrix])
         k_indx += 1
     print(cipher)
@@ -126,23 +135,25 @@ def lab4Dec():
     k_indx = 0
 
     msg_indx = 0
+    # длина зашифрованного сообщения
     msg_len = float(len(to_decript))
     msg_lst = list(to_decript)
-
+    # количество столбцов
     col = len(key)
-
+    # количество строк
     row = int(math.ceil(msg_len / col))
-
+    # номера столбцов из ключа
     key_lst = sorted(list(key))
-
+    # генерация матрицы для расшифрования 
     dec_cipher = []
     for _ in range(row):
         dec_cipher += [[None] * col]
-
+    #
     for _ in range(col):
         curr_idx = key.index(key_lst[k_indx])
-
+        print(curr_idx)
         for j in range(row):
+            # вставка колонок шифртекста в соответствующие по ключу столбцы матрциы
             dec_cipher[j][curr_idx] = msg_lst[msg_indx]
             msg_indx += 1
         k_indx += 1
@@ -151,22 +162,24 @@ def lab4Dec():
 
     if null_count > 0:
         return msg[: -null_count]
-
+    # присоединение ячеек матрицы к расшифрованной строке
     msg = ''.join(sum(dec_cipher, []))
 
     return jsonify(msg.replace('_', ''))
 
 @app.route('/lab4Enc1', methods= ['GET'])
 def lab4Enc1():
+    # предобработка текста
     to_encrypt = request.args.get('msg')
     dict = {'.': 'тчк', ',': 'зпт', '!' : 'вск', '?' : 'впр'}
     to_encrypt = to_encrypt.replace(' ', '')
     for i, j in dict.items():
         to_encrypt = to_encrypt.replace(i, j)
     to_encrypt = to_encrypt.lower()
-
-    gaps = [(7, 7), (6, 0), (5, 0), (4, 0), (7, 1), (1, 1), (1, 2), (4, 1),
-                (7, 2), (2, 1), (2, 5), (2, 3), (7, 3), (3, 1), (3, 2), (3, 4)]
+    #составление кортежа пропусков в решетке(вырезанные клетки)
+    gaps = request.args.get('key')
+    print(gaps)
+    #создание решетки с указанием размерности и вырезанными клетками
     r = Cardan(8, gaps)
     inp_text = to_encrypt
     inp_text = inp_text.replace(' ', '')
@@ -175,9 +188,10 @@ def lab4Enc1():
     print(enc_text.replace(' ', ''))
     print(r.decode(enc_text, n))
     return jsonify(enc_text.replace(' ', ''),r.decode(enc_text, n))
-
+# класс, отвечающий за взаимодействие с решеткой кардано
 class Cardan(object):
     def __init__(self, size, spaces):
+        # предобработка текста
         self.size = int(size)
         self.spaces = str(spaces)
         self.spaces = self.spaces.replace("[", '')
@@ -276,12 +290,14 @@ def lab5shennon():
     alphabet = alphabet.replace(' ', '')
     alphabet_lower = {}
     i = 0
+    # составление словаря с буквой и ее индексом
     while i < (len(alphabet)):
         alphabet_lower.update({alphabet[i]: i})
         i += 1
 
 
     to_encrypt = request.args.get('msg')
+    # предобработка текста
     dict = {'.': 'тчк', ',': 'зпт', '!' : 'вск', '?' : 'впр'}
     to_encrypt = to_encrypt.replace(' ', '')
     for i, j in dict.items():
@@ -306,43 +322,51 @@ def lab5shennon():
         return replace2(decrypted_text, dict)
     txt_encoded = lab5encode(input_enc(), alphabet_lower)
     txt_decoded = dec_text(lab5decode(txt_encoded[0], txt_encoded[1],alphabet_lower))
-    print(txt_encoded)
-    print(txt_decoded)
     return jsonify(txt_encoded,txt_decoded)
-
+# функция получения ключа
 def get_key(d, value):
     for k, v in d.items():
         if v == value:
             return k
-
+# шифрование
 def lab5encode(msg, alphabet_lower):
     msg_list = list(msg)
     msg_list_len = len(msg_list)
     msg_code_bin_list = list()
+    # массив с индексами букв сообщения
     for i in range(len(msg_list)):
         msg_code_bin_list.append(alphabet_lower.get(msg_list[i]))
-
+        
+    # генерация гаммы 
     key_list = list()
     for i in range(msg_list_len):
         key_list.append(random.randint(0, 32))
 
     cipher_list = list()
     for i in range(msg_list_len):
+        # представление в виде индексов
         m = int(msg_code_bin_list[i])
         k = int(key_list[i])
+        # XOR
         cipher_list.append(int(bin(m ^ k), base=2))
+    # вывод значения
     return cipher_list, key_list
 
+# расшифрование
 def lab5decode(msg, key_list, alphabet_lower):
     decipher_list = list()
     msg_list_len = len(msg)
     for i in range(msg_list_len):
+        # представление в виде индексов
         c = int(msg[i])
         k = int(key_list[i])
+        # XOR
         decipher_list.append(int(bin(c ^ k), base=2))
     deciphered_str = ""
+    # нахождение букв в алфавите с помощью расшифрованных индексов
     for i in range(len(decipher_list)):
         deciphered_str += get_key(alphabet_lower, decipher_list[i])
+    # вывод значения
     return deciphered_str
 
 
@@ -463,6 +487,7 @@ def lab6():
 
 @app.route('/lab6a51',methods=['GET'])
 def lab6a51():
+    # выставление длины регистров
     reg_x_length = 19
     reg_y_length = 22
     reg_z_length = 23
@@ -474,15 +499,17 @@ def lab6a51():
     alphabet = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя "
     
     dict = {'.': 'тчк', ',': 'зпт', '!' : 'вск', '?' : 'впр'}
-    key = '0101001000011010110001110001100100101001000000110111111010110111'
+    key = request.args.get('key')
+    
     to_encrypt = request.args.get('msg')
+    #подготовка сообщения к шифрованию
     def replace_all_to(input_text, dict):
         input_text = input_text.replace(' ', '')
         for i, j in dict.items():
             input_text = input_text.replace(i, j)
         return input_text
 
-
+    # обратная смена в расшифрованном сообщении
     def replace_all_from(input_text, dict):
         for i, j in dict.items():
             input_text = input_text.replace(j, i)
@@ -494,25 +521,30 @@ def lab6a51():
 
     def output_from_decrypted(decrypted_text):
         return replace_all_from(decrypted_text, dict)
+    
+    # функция записи частей ключа в регистры
     def loading_registers(key):
         i = 0
+        # запись в первый регистр(19)
         while(i < reg_x_length):
             reg_x.insert(i, int(key[i]))
             i = i + 1
         j = 0
         p = reg_x_length
+        # запись во второй регистр(22)
         while(j < reg_y_length):
             reg_y.insert(j, int(key[p]))
             p = p + 1
             j = j + 1
         k = reg_y_length + reg_x_length
         r = 0
+        # запись в третий регистр(23)
         while(r < reg_z_length):
             reg_z.insert(r, int(key[k]))
             k = k + 1
             r = r + 1
 
-
+    # проверка ключа
     def set_key(key):
         if(len(key) == 64 and re.match("^([01])+", key)):
             key_one = key
@@ -524,7 +556,7 @@ def lab6a51():
     def get_key():
         return key_one
 
-
+    # перевод сообщения в двоичную СИ
     def to_binary(plain):
         s = ""
         i = 0
@@ -542,7 +574,7 @@ def lab6a51():
             k = k + 1
         return binary_values
 
-
+    # функция вычисления majority(какого числа больше) (F = x&y|x&z|y&z)
     def get_majority(x, y, z):
         if(x + y + z > 1):
             return 1
@@ -557,39 +589,47 @@ def lab6a51():
         keystream = []
         i = 0
         while i < length:
+            # нахождение majority (F = x&y|x&z|y&z)
             majority = get_majority(reg_x_temp[8], reg_y_temp[10], reg_z_temp[10])
+            # если 8 бит первого регистра совпадает с majority
             if reg_x_temp[8] == majority:
+                # вычисление многочлена обратной связи (XOR)
                 new = reg_x_temp[13] ^ reg_x_temp[16] ^ reg_x_temp[17] ^ reg_x_temp[18]
                 reg_x_temp_two = copy.deepcopy(reg_x_temp)
                 j = 1
+                # сдвиг всех элементов вправо, первым становится многочлен обратной связи
                 while(j < len(reg_x_temp)):
                     reg_x_temp[j] = reg_x_temp_two[j-1]
                     j = j + 1
                 reg_x_temp[0] = new
-
+            # если 10 бит второго регистра совпадает с majority
             if reg_y_temp[10] == majority:
+                # вычисление многочлена обратной связи (XOR)
                 new_one = reg_y_temp[20] ^ reg_y_temp[21]
                 reg_y_temp_two = copy.deepcopy(reg_y_temp)
                 k = 1
+                # сдвиг всех элементов вправо, первым становится многочлен обратной связи
                 while(k < len(reg_y_temp)):
                     reg_y_temp[k] = reg_y_temp_two[k-1]
                     k = k + 1
                 reg_y_temp[0] = new_one
-
+            # если 10 бит третьего регистра совпадает с majority
             if reg_z_temp[10] == majority:
+                # вычисление многочлена обратной связи (XOR)
                 new_two = reg_z_temp[7] ^ reg_z_temp[20] ^ reg_z_temp[21] ^ reg_z_temp[22]
                 reg_z_temp_two = copy.deepcopy(reg_z_temp)
                 m = 1
+                # сдвиг всех элементов вправо, первым становится многочлен обратной связи
                 while(m < len(reg_z_temp)):
                     reg_z_temp[m] = reg_z_temp_two[m-1]
                     m = m + 1
                 reg_z_temp[0] = new_two
-
+            # вычисление выходного бита системы (XOR)
             keystream.insert(i, reg_x_temp[18] ^ reg_y_temp[21] ^ reg_z_temp[22])
             i = i + 1
         return keystream
 
-
+    # функция перевода двоичных значений в текст        
     def convert_binary_to_str(binary):
         s = ""
         length = len(binary) - 12
@@ -631,224 +671,6 @@ def lab7():
     return render_template('lab7.html')
 
 
-@app.route('/lab7kuznechik',methods=['GET'])
-def lab7kuznechik():
-    alphabet_lower = {'а':0, 'б':1, 'в':2, 'г':3, 'д':4,
-                  'е':5, 'ж':6, 'з':7, 'и':8, 'й':9,
-                  'к':10, 'л':11, 'м':12, 'н':13, 'о':14,
-                  'п':15, 'р':16, 'с':17, 'т':18, 'у':19,
-                  'ф':20, 'х':21, 'ц':22, 'ч':23, 'ш':24,
-                  'щ':25, 'ъ':26, 'ы':27, 'ь':28, 'э':29,
-                  'ю':30, 'я':31, ' ':32, ",":33, ".":34
-                  }
-
-#хэшируем сообщение
-    msg = request.args.get('msg')
-    msg_list = list(msg)
-    alpha_code_msg = list()
-    for i in range(len(msg_list)):
-        alpha_code_msg.append(int(alphabet_lower.get(msg_list[i])))
-    print("Длина исходного сообщения {} символов".format(len(alpha_code_msg)))
-    def hash_value(mod,alpha_code):
-        i = 0
-        hashing_value = 1
-        while i < len(alpha_code_msg):
-            hashing_value = (((hashing_value-1) + int(alpha_code_msg[i]))**2) % curve.p
-            i += 1
-        return hashing_value
-
-    #класс точки, нужен для хранения точек и вывода их
-    class Point:
-        def __init__(self,x_init,y_init):
-            self.x = x_init
-            self.y = y_init
-
-        def shift(self, x, y):
-            self.x += x
-            self.y += y
-
-        def __repr__(self):
-            return "".join(["( x=", str(self.x), ", y=", str(self.y), ")"])
-
-    x_1=0 #магические переменные, которые хранят координаты точки Q
-    y_1=0 #магические переменные, которые хранят координаты точки Q
-    EllipticCurve = collections.namedtuple('EllipticCurve', 'name p q_mod a b q g n h') #тюпл(статичный массив, именной, хранит переменные(параметры эк))
-    curve = EllipticCurve(
-        'secp256k1',
-        #параметры поля
-        #модуль поля
-        p=0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f,
-        q_mod = 0xfffffffffefffffffffcfffffffffffcfffffffffffffffffffffffefffffc2f,
-        #коэфф а и b
-        a=7,
-        b=11,
-        #Базовая точка эк записано в hex
-        g=(0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798,
-        0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8),
-        q=(0xA0434D9E47F3C86235477C7B1AE6AE5D3442D49B1943C2B752A68E2A47E247C7,
-        0x893ABA425419BC27A3B6C7E693A24C696F794C2ED877A1593CBEE53B037368D7),
-        #Подгруппа группы точек
-        n=0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141,
-        #Подгруппа
-        h=1,
-    )
-    print("Q mod",int(curve.q_mod))
-    print("P mod",int(curve.p))
-    def is_on_curve(point):
-        """Возвращает True если точка лежит на элиптической кривой."""
-        if point is None:
-            return True
-
-        x, y = point
-
-        return (y * y - x * x * x - curve.a * x - curve.b) % curve.p == 0
-
-    def point_neg(point):
-        """Инвертирует точку по оси y -point."""
-        #assert is_on_curve(point)
-
-        if point is None:
-            # -0 = 0
-            return None
-
-        x, y = point
-        result = (x, -y % curve.p)
-
-        #assert is_on_curve(result)
-
-        return result
-
-    def inverse_mod(k, p):
-        """Возвращает обратное k по модулю p.
-        Эта функция возвращает число x удовлетворяющее условию (x * k) % p == 1.
-        k не должно быть равно 0 и p должно быть простым.
-        """
-        if k == 0:
-            raise ZeroDivisionError('деление на 0')
-
-        if k < 0:
-            # k ** -1 = p - (-k) ** -1  (mod p)
-            return p - inverse_mod(-k, p)
-
-        # Раширенный алгоритм Евклида.
-        s, old_s = 0, 1
-        t, old_t = 1, 0
-        r, old_r = p, k
-
-        while r != 0:
-            quotient = old_r // r
-            old_r, r = r, old_r - quotient * r
-            old_s, s = s, old_s - quotient * s
-            old_t, t = t, old_t - quotient * t
-
-        gcd, x, y = old_r, old_s, old_t
-
-        assert gcd == 1
-        assert (k * x) % p == 1
-
-        return x % p
-
-    def point_add(point1, point2):
-        """Возвращает результат операции сложения point1 + point2 оперируя законами операции над группами."""
-        #assert is_on_curve(point1)
-        #assert is_on_curve(point2)
-
-        if point1 is None:
-            # 0 + point2 = point2
-            return point2
-        if point2 is None:
-            # point1 + 0 = point1
-            return point1
-
-        x1, y1 = point1
-        x2, y2 = point2
-
-        if x1 == x2 and y1 != y2:
-            # point1 + (-point1) = 0
-            return None
-
-        if x1 == x2:
-            # This is the case point1 == point2.
-            m = (3 * x1 * x1 + curve.a) * inverse_mod(2 * y1, curve.p)
-        else:
-            # This is the case point1 != point2.
-            m = (y1 - y2) * inverse_mod(x1 - x2, curve.p)
-
-        x3 = m * m - x1 - x2
-        y3 = y1 + m * (x3 - x1)
-        result = (x3 % curve.p,
-                -y3 % curve.p)
-
-        #assert is_on_curve(result)
-
-        return result
-
-    def scalar_mult(k, point):
-        """Возвращает k * точку используя дублирование и алгоритм сложения точек."""
-        #assert is_on_curve(point)
-
-        if k % curve.n == 0 or point is None:
-            return None
-
-        if k < 0:
-            # k * point = -k * (-point)
-            return scalar_mult(-k, point_neg(point))
-
-        result = None
-        addend = point
-
-        while k:
-            if k & 1:
-                # Add.
-                result = point_add(result, addend)
-
-            # Double.
-            addend = point_add(addend, addend)
-
-            k >>= 1
-
-        #assert is_on_curve(result)
-
-        return result
-
-    #Вывод хэш-значения
-    hash_code_msg = hash_value(curve.p, alpha_code_msg)
-    print("Хэш сообщения:={}".format(hash_code_msg))
-    #вычисляем е, обращаемся через тюпл к перемнной p
-    e = hash_code_msg%curve.q_mod
-    print("E={}".format(e))
-    #генерация k
-    k = random.randint(1,curve.q_mod)
-    print("K={}".format(k))
-    print("")
-    #нахождение точки элиптической кривой из базовый точки C=K * P(x,y)
-    d = 10
-    print("D={}".format(d))
-    x,y = scalar_mult(k,curve.g)
-    point_c = Point(x,y)
-    print("Point_C={}".format(point_c))
-    r = point_c.x % curve.q_mod
-    print("R={}".format(r))
-    s = (r*curve.p + k*e)%curve.q_mod
-    print("S={}".format(s))
-    #проверка подписи
-    v = inverse_mod(e,curve.p)
-    print("V={}".format(v))
-    z1 = (s*v)%curve.q_mod
-    z2 = ((curve.p-r)*v)%curve.q_mod
-    x_1,y_1 = scalar_mult(d,curve.g)
-    print("Point_Q=( x={}, y={} )".format(x_1,y_1))
-    point_c_new = Point(x,y)
-    x,y = point_add(scalar_mult(z1,curve.g),
-                    scalar_mult(z2,curve.q))
-    r_1 = point_c_new.x% curve.q_mod
-    print("R_new={}".format(r_1))
-    if r == r_1:
-        print("Подпись прошла проверку!")
-    else:
-        print("Ошибка проверки!")
-    return jsonify(2)
-
 
 @app.route('/lab7Magma', methods=['GET'])
 def lab7Magma():
@@ -863,7 +685,7 @@ def lab7Magma():
     pi7 = [1, 7, 14, 13, 0, 5, 8, 3, 4, 15, 10, 6, 9, 12, 11, 2]
     pi = [pi0, pi1, pi2, pi3, pi4, pi5, pi6, pi7]
     MASK32 = 2 ** 32 - 1
-    print ('Введите текст')
+    prekey = request.args.get('key')
     to_encrypt = request.args.get('msg')
     def t(x):
         y = 0
@@ -910,7 +732,7 @@ def lab7Magma():
             (L, R) = (R, L ^ g(R, keys[i]))
         return join(L ^ g(R, keys[-1]), R)
     # установка ключа
-    key = int('ffeeddccbbaa99887766554433221100f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff', 16)
+    key = int(str(prekey), 16)
     i = 0
     text_short = to_encrypt
     encr_short = []
@@ -944,6 +766,7 @@ def lab8rsa():
 
     def multiplicative_inverse(e,r):
         for i in range(r):
+            print('(e*i) разд на r == 1', (e*i)%r)
             if((e*i)%r == 1):
                 return i
     # Ф-ия определения простоты
@@ -971,18 +794,24 @@ def lab8rsa():
 
         g = gcd(e, phi)
         while g != 1:
+            print('g', g)
             e = random.randrange(1, phi)
             g = gcd(e, phi)
         d = multiplicative_inverse(e, phi)
+        print('d',d)
         return ((e, n), (d, n))
     # шифрование
     def encrypt(pk, plaintext):
         key, n = pk
+        # шифртекст  получается последовательным шифрованием каждой шифрвеличины Mi возведением ее в степень E по модулю N: 
+        # Ci = Mi^E MOD N
         cipher = [(ord(char) ** key) % n for char in plaintext]
         return cipher
     # расшифровка
     def decrypt(pk, ciphertext):
         key, n = pk
+        # расшифровывание сообщения, возводя последовательно Сi в степень D по модулю N:
+        # Mi = Ci^D MOD N
         plain = [chr((char ** key) % n) for char in ciphertext]
         return ''.join(plain)
     try:
@@ -1058,6 +887,7 @@ def lab9dsrsa():
     for i in range(len(msg_list)):
         alpha_code_msg.append(int(alphabet_lower.get(msg_list[i])))
     print("Длина исходного сообщения {} символов".format(len(alpha_code_msg)))
+    # функция хэширования
     def hash_value(n,alpha_code):
         i = 0
         hashing_value = 1
@@ -1111,11 +941,11 @@ def gost94():
             if flag == False:
                 array.append(s)
             flag = False
-        p = 31
+        p = int(request.args.get('p'))
         print("p = ", p)
-        q = 5
+        q = int(request.args.get('q'))
         print("q = ", q)
-        a = 2
+        a = int(request.args.get('a'))
         print("a =", a)
         array2 = []
         flag2 = False
@@ -1127,10 +957,10 @@ def gost94():
             if flag2 == False:
                 array2.append(s)
             flag2 = False
-        x = 3
+        x = int(request.args.get('x'))
         print("x = ", x)
         y = a**x % p
-        k = 4
+        k = int(request.args.get('k'))
         print("k = ", k)
         #
         r = (a**k % p) % q
@@ -1158,6 +988,8 @@ def gost94():
             res ="Подпись неверна"
             print("Подпись неверна")
         return r % (2**256),s % (2**256),u,res
+    
+    # функци хэширования
     def hash_value(n, alpha_code):
         i = 0
         hash = 1
@@ -1165,6 +997,7 @@ def gost94():
             hash = (((hash-1) + int(alpha_code[i]))**2) % n
             i += 1
         return hash
+
     msg = request.args.get('msg')
     dict = {'.': 'тчк', ',': 'зпт', '!' : 'вск', '?' : 'впр'}
     for i, j in dict.items():

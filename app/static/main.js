@@ -1,8 +1,9 @@
 TrueAlph = true;
-var alphabet = `абвгдеёжзийклмнопрстуфхцчшщъыьэюя!? ;-:,.\n'"`;
+// var alphabet = `абвгдеёжзийклмнопрстуфхцчшщъыьэюя!? ;-:,.\n'"`;
 var matrixCol = 0;
 var ObrMatrix = '';
-// var alphabet = `абвгдежзийклмнопрстуфхцчшщъыьэюя`;
+var alphabet = `абвгдежзийклмнопрстуфхцчшщъыьэюя `;
+
 function switching() {
     if (TrueAlph) {
         alphabet = `абвгдежзийклмнопрстуфхцчшщъыьэюя`;
@@ -15,11 +16,37 @@ function switching() {
     }
 }
 
+function prepare(message) {
+    message = message.toLowerCase();
+    message = message.replaceAll(`!`, 'вск');
+    message = message.replaceAll(`?`, 'впр');
+    message = message.replaceAll(`;`, 'тчкзпт');
+    message = message.replaceAll(`-`, '');
+    message = message.replaceAll(`:`, '');
+    message = message.replaceAll(`,`, 'зпт');
+    message = message.replaceAll(`.`, 'тчк');
+    message = message.replaceAll(`\n`, '');
+    message = message.replaceAll(`"`, '');
+    message = message.replaceAll(`'`, '');
+    return message
+}
+
+function replaceBack(message) {
+    message = message.replaceAll(`вск`, '!');
+    message = message.replaceAll(`впр`, '?');
+    message = message.replaceAll(`тчкзпт`, ';');
+    message = message.replaceAll(`зпт`, ',');
+    message = message.replaceAll(`тчк`, '.');
+    return message
+}
+
 function atbash(message) {
+    var alphabet = `абвгдежзийклмнопрстуфхцчшщъыьэюя`;
     var encoded_string = "";
     var decoded_string = "";
-    message = message.toLowerCase();
-    // шифрование атбаш
+    message = prepare(message)
+    message = message.replaceAll(' ', '')
+        // шифрование атбаш
     for (i = 0; i < message.length; i++) {
         b = alphabet.length - alphabet.indexOf(message[i]) - 1;
         encoded_string += alphabet[b];
@@ -30,7 +57,7 @@ function atbash(message) {
         b = alphabet.length - alphabet.indexOf(encoded_string[i]) - 1;
         decoded_string += alphabet[b];
     }
-    $('#lab1_1_dec').val(decoded_string);
+    $('#lab1_1_dec').val(replaceBack(decoded_string));
     return encoded_string;
 }
 
@@ -38,7 +65,14 @@ function caesar(message, step) {
     var encoded_string = "";
     var decoded_string = "";
     step = $('#lab1_2_step').val();
-    message = message.toLowerCase();
+    // проверка ключа
+    if (Number.isInteger(Number(step))) {
+
+    } else {
+        alert('Введите число типа int')
+        return;
+    }
+    message = prepare(message);
     // шифрование цезарь
     for (i = 0; i < message.length; i++) {
         b = (alphabet.length + alphabet.indexOf(message[i]) + step % alphabet.length) % alphabet.length;
@@ -50,7 +84,7 @@ function caesar(message, step) {
         b = (alphabet.length + alphabet.indexOf(encoded_string[i]) - step % alphabet.length) % alphabet.length;
         decoded_string += alphabet[b];
     }
-    $('#lab1_2_dec').val(decoded_string);
+    $('#lab1_2_dec').val(replaceBack(decoded_string));
     return encoded_string;
 
 }
@@ -58,7 +92,7 @@ function caesar(message, step) {
 function polibius(message) {
     var encoded_string = "";
     var decoded_string = "";
-    message = message.toLowerCase();
+    message = prepare(message);
     square = 0;
     // составление квадрата
     while (alphabet.length > square ** 2 || alphabet.length == square ** 2) {
@@ -82,9 +116,6 @@ function polibius(message) {
         }
     }
 
-    console.log(square);
-    console.log(x);
-    console.log(encoded_string);
     // расшифровка квадрат полибия
     enc_array = encoded_string.split(' ');
     for (i = 0; i < enc_array.length; i++) {
@@ -92,15 +123,16 @@ function polibius(message) {
             decoded_string += x[Number(enc_array[i][0])][Number(enc_array[i][1])];
         }
     }
-    console.log(decoded_string);
     $('#lab1_3_enc').val(encoded_string);
-    $('#lab1_3_dec').val(decoded_string);
+    $('#lab1_3_dec').val(replaceBack(decoded_string));
 }
 
 function tritemius(message) {
     var encoded_string = "";
     var decoded_string = "";
-    message = message.toLowerCase();
+    message = prepare(message);
+    message = message.replaceAll(' ', '');
+    var alphabet = `абвгдежзийклмнопрстуфхцчшщъыьэюя`;
     // шифрование тритемия
     for (i = 0; i < message.length; i++) {
         b = (alphabet.length + alphabet.indexOf(message[i]) + i % alphabet.length) % alphabet.length;
@@ -112,35 +144,33 @@ function tritemius(message) {
         b = (alphabet.length + alphabet.indexOf(encoded_string[i]) - i % alphabet.length) % alphabet.length;
         decoded_string += alphabet[b];
     }
-    $('#lab2_1_dec').val(decoded_string);
+    $('#lab2_1_dec').val(replaceBack(decoded_string));
     return encoded_string;
 }
 
 function belazo(message, key) {
     var encoded_string = "";
     var decoded_string = "";
-    message = message.toLowerCase();
-    message = message.replace(`!`, '');
-    message = message.replace(`?`, '');
-    message = message.replace(`;`, '');
-    message = message.replace(`-`, '');
-    message = message.replace(`:`, '');
-    message = message.replace(`,`, '');
-    message = message.replace(`.`, '');
-    message = message.replace(`\n`, '');
-    message = message.replace(`"`, '');
-    message = message.replace(`'`, '');
+    var alphabet = `абвгдежзийклмнопрстуфхцчшщъыьэюя`;
+    message = prepare(message);
     messArr = message.split(' ');
     console.log(messArr);
     currlenght = 0;
+    // проверка ключа
+    if (Number.isInteger(Number(key))) {
+        alert('Ключ должен быть типа str и не содержать чисел');
+        return;
+    }
     //шифрование
     for (i = 0; i < messArr.length; i++) {
         for (j = 0; j < messArr[i].length; j++) {
 
             currAlphabet = alphabet.substring(alphabet.indexOf(key[currlenght % key.length]), alphabet.length) + alphabet.substring(0, alphabet.indexOf(key[currlenght % key.length]));
+            // подробная последовательность действий выполнения программы
             console.log(`найти ${messArr[i][j]} при помощи ${key[currlenght%key.length]} в ` + currAlphabet);
             console.log('получается');
             console.log(currAlphabet[alphabet.indexOf(messArr[i][j])]);
+
             encoded_string += currAlphabet[alphabet.indexOf(messArr[i][j])];
             currlenght++;
         }
@@ -149,7 +179,7 @@ function belazo(message, key) {
     $('#lab2_2_enc').val(encoded_string);
     encArr = encoded_string.split(' ');
     currlenght = 0;
-    // дешифровка
+    // расшифровка
     for (i = 0; i < encArr.length; i++) {
         for (j = 0; j < encArr[i].length; j++) {
             console.log(encArr[i][j]);
@@ -160,25 +190,21 @@ function belazo(message, key) {
         decoded_string += ' ';
     }
     console.log(decoded_string);
-    $('#lab2_2_dec').val(decoded_string);
+    $('#lab2_2_dec').val(replaceBack(decoded_string));
 }
 
 function vizhener(message, key) {
     currlenght = 0;
+    var alphabet = `абвгдежзийклмнопрстуфхцчшщъыьэюя`;
     key = key[0];
+    // проверка ключа
+    if (Number.isInteger(Number(key))) {
+        alert('Ключ должен быть типа str и не содержать чисел');
+        return;
+    }
     var encoded_string = "";
     var decoded_string = "";
-    message = message.toLowerCase();
-    message = message.replace(`!`, '');
-    message = message.replace(`?`, '');
-    message = message.replace(`;`, '');
-    message = message.replace(`-`, '');
-    message = message.replace(`:`, '');
-    message = message.replace(`,`, '');
-    message = message.replace(`.`, '');
-    message = message.replace(`\n`, '');
-    message = message.replace(`"`, '');
-    message = message.replace(`'`, '');
+    message = prepare(message);
     messArr = message.split(' ');
     new_alph = key + message;
     new_alph = new_alph.replace(' ', '');
@@ -201,7 +227,7 @@ function vizhener(message, key) {
     new_enc = key + encoded_string.replace(' ', '');
     encArr = encArr = encoded_string.split(' ');
     currlenght = 0;
-    //дешифровка
+    //расшифрование
     for (i = 0; i < encArr.length; i++) {
         for (j = 0; j < encArr[i].length; j++) {
             decoded_string += alphabet[(alphabet.length + alphabet.indexOf(encArr[i][j]) - alphabet.indexOf(new_alph[currlenght])) % alphabet.length];
@@ -209,29 +235,19 @@ function vizhener(message, key) {
         }
         decoded_string += ' '
     }
-    $('#lab2_3_dec').val(decoded_string);
+    $('#lab2_3_dec').val(replaceBack(decoded_string));
 }
 
 function matrixCypher(message) {
-    message = message.toLowerCase();
-    message = message.toLowerCase();
-    message = message.replace(`!`, '');
-    message = message.replace(`?`, '');
-    message = message.replace(`;`, '');
-    message = message.replace(`-`, '');
-    message = message.replace(`:`, '');
-    message = message.replace(`,`, '');
-    message = message.replace(`.`, '');
-    message = message.replace(`\n`, '');
-    message = message.replace(`"`, '');
-    message = message.replace(`'`, '');
-
+    message = prepare(message);
+    // проверка условия
     if (message.length < matrixCol) {
         alert(`Исходное сообщение должно быть >= ${matrixCol}`);
         return 0
     }
     var pythonMatrix = ''
     var matrixInput = document.querySelector('#MatrixPlace');
+    // заполнение массива значениями из матрицы
     var InputedMatrix = new Array(matrixInput.children.length);
     for (i = 0; i < matrixInput.children.length; i++) {
         InputedMatrix[i] = new Array(matrixInput.children.length);
@@ -283,6 +299,7 @@ function matrixCypher(message) {
     //  $('#lab3_1_enc').val(enc_string);
     url = `${window.location.origin}` + '/lab3Obr' + `?matrix=${pythonMatrix}`;
     sendRequest(url, 'GET', function() {
+        // проверка ключа
         if (this.response == "вырожденная") {
             alert("Ошибка. Определитель матрицы равен нулю")
             return 0
@@ -291,6 +308,7 @@ function matrixCypher(message) {
 
         Obr_str = ''
         console.log(ObrMatrix);
+        // преобразование вида матрицы для вычислений
         for (i = 0; i < ObrMatrix.length; i++) {
             for (j = 0; j < ObrMatrix[i].length; j++) {
                 Obr_str += ' ' + ObrMatrix[i][j];
@@ -299,6 +317,7 @@ function matrixCypher(message) {
             Obr_str += ';'
         }
         enc_str = ''
+            //  cоставление векторов
         for (i = 0; i < enc_array.length; i += parseInt(matrixCol)) {
             if (i < enc_array.length - 1) {
 
@@ -315,7 +334,7 @@ function matrixCypher(message) {
             for (i = 0; i < UmnMatrix.length; i++)
                 dec_str += alphabet1[UmnMatrix[i]];
             Array.prototype.push.apply(enc_array, UmnMatrix)
-            $('#lab3_1_dec').val(dec_str);
+            $('#lab3_1_dec').val(replaceBack(dec_str));
             console.log(dec_str)
         })
 
@@ -325,6 +344,7 @@ function matrixCypher(message) {
 function BuildMatrix(Number) {
     matrixCol = Number;
     document.querySelector('#MatrixPlace').innerHTML = '';
+    // построение матрицы по заданным пользователем значениям в GUI
     for (i = 0; i < Number; i++) {
         var row = document.createElement('div');
         row.classList += "row";
@@ -376,36 +396,37 @@ window.onload = function() {
         VerticalCypher($('#lab4_1_mes').val(), $('#lab4_1_key').val());
     });
     $('#lab4_2').click(function() {
-        Cardan($('#lab4_2_mes').val());
+        Cardan($('#lab4_2_mes').val(), $('#lab4_2_key').val());
     });
     $('#lab5_1').click(function() {
-        Shennon($('#lab5_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
+        Shennon(prepare($('#lab5_1_mes').val()), );
     });
     $('#lab5_2').click(function() {
-        Gost89($('#lab5_2_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
+        Gost89(prepare($('#lab5_2_mes').val()), );
     });
     $('#lab6_1').click(function() {
-        A51($('#lab6_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
+        A51(prepare($('#lab6_1_mes').val()), $('#lab6_1_key').val());
     });
-    $('#lab7_1').click(function() {
-        Kuznechik($('#lab7_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
-    });
+    // $('#lab7_1').click(function() {
+    //     Kuznechik($('#lab7_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
+    // });
     $('#lab7_2').click(function() {
-        Magma($('#lab7_2_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), );
+        Magma(prepare($('#lab7_2_mes').val()), $('#lab7_2_key').val());
     });
     $('#lab8_1').click(function() {
-        RSA($('#lab8_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase().replaceAll('.', 'тчк').replaceAll(',', 'зпт').replaceAll('!', 'вск').replaceAll('?', 'впр'), $('#lab8_1_p').val(), $('#lab8_1_q').val());
+        RSA(prepare($('#lab8_1_mes').val()), $('#lab8_1_p').val(), $('#lab8_1_q').val());
     });
     $('#lab9_1').click(function() {
-        DSRSA($('#lab9_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase(), $('#lab9_1_p').val(), $('#lab9_1_q').val());
+        DSRSA(prepare($('#lab9_1_mes').val()), $('#lab9_1_p').val(), $('#lab9_1_q').val());
     });
     $('#lab10_1').click(function() {
-        gost94($('#lab10_1_mes').val().replaceAll('\n', ' ').replaceAll('-', ' ').replaceAll(':', ' ').replaceAll(';', ' ').replaceAll('"', ' ').replaceAll(')', '').replaceAll('(', '').toLowerCase());
+        gost94(prepare($('#lab10_1_mes').val()), $('#lab10_1_p').val(), $('#lab10_1_q').val(), $('#lab10_1_a').val(), $('#lab10_1_x').val(), $('#lab10_1_k').val());
     });
     $('#lab11_1_btn1').click(function() {
         n1 = parseInt($('#lab11_1_2').val());
         a1 = parseInt($('#lab11_1_1').val());
         ka1 = parseInt($('#lab11_1_ka').val());
+        // проверка введенных пользователем значений
         if (n1 > a1 && ka1 > 2 && ka1 < n1 - 1) {
             $('#hidden1').removeClass('d-none');
             $('#hidden1Ya').text('Ваш Ya = ' + a1 ** ka1 % n1)
@@ -423,6 +444,7 @@ window.onload = function() {
         n2 = parseInt($('#lab11_2_2').val());
         a2 = parseInt($('#lab11_2_1').val());
         ka2 = parseInt($('#lab11_2_ka').val());
+        // проверка введенных пользователем значений
         if (n2 > a2 && ka2 > 2 && ka2 < n2 - 1) {
             $('#hidden2').removeClass('d-none');
             $('#hidden2Ya').text('Ваш Ya = ' + a2 ** ka2 % n2)
@@ -455,11 +477,18 @@ var flagX = false;
 var flagAdd = false;
 
 function processKey() {
-    var key = document.getElementById("lab3_2_key").value;
-    key = key.toUpperCase().replace(/\s/g, '').replace(/J/g, "I");
+
+    var key = document.getElementById("lab3_2_key").value.replaceAll('й', 'и').replaceAll('ъ', 'ь').replaceAll('ё', 'е');
+    key = key.toUpperCase().replace(/\s/g, '');
+    // проверка ключа
+    if (Number.isInteger(Number(key))) {
+        alert('Ключ должен быть типа str и не содержать чисел');
+        return '';
+    }
     var result = [];
     var temp = '';
-    var alphabet = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ.-_';
+    var alphabet = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЫЬЭЮЯ';
+    // удаление из алфавита букв, присутствующих в ключе
     for (var i = 0; i < key.length; i++) {
         if (alphabet.indexOf(key[i]) !== -1) {
             alphabet = alphabet.replace(key[i], '');
@@ -469,65 +498,66 @@ function processKey() {
     }
     console.log('НОВЫЙ КЛЮЧ')
     console.log(temp);
+    // соединение ключа и алфавита
     temp += alphabet;
     var result = [];
     temp = temp.split('');
     while (temp[0]) {
-        result.push(temp.splice(0, 6));
+        result.push(temp.splice(0, 5));
     }
     return result;
 }
 
 function Playfaircipher() {
+
     var keyresult = processKey();
     var res = [];
     var error = 'Строка пуста';
-    var str = document.getElementById("lab3_2_mes").value;
-    str = str.replace(`!`, 'вск');
-    str = str.replace(`?`, 'впр');
-    str = str.replace(`;`, 'тчкзпт');
-    str = str.replace(`-`, 'тр');
-    str = str.replace(`:`, 'двтч');
-    str = str.replace(`,`, 'зпт');
-    str = str.replace(`.`, 'тчк');
-    str = str.replace(`\n`, '');
-    str = str.replace(`"`, '');
-    str = str.replace(`'`, '');
-    if (str === '') {
-        alert(error);
-    }
+
+    var str = document.getElementById("lab3_2_mes").value.replaceAll(' ', '');
+    str = prepare(str);
+    // if (str === '') {
+    //     alert(error);
+    //     return
+    // }
     // var err = 'ERRORX';
     var textPhrase, separator;
-    str = str.toUpperCase().replace(/\s/g, '').replace(/J/g, "I");
+    str = str.toUpperCase();
     if (str.length === 0) {} else {
         textPhrase = str[0];
     }
     var help = 0;
     flagAdd = false;
+    // случаи вставки сепараторов
     for (var i = 1; i < str.length; i++) {
         if (str[i - 1] === str[i]) {
             if (str[i] === 'Х') {
-                separator = 'Ъ';
+                // вставка сепаратора ь, если текущий символ равен х
+                separator = 'Ь';
             } else {
+                // вставка сепаратора х, если текущий символ не равен х
                 separator = 'Х';
             }
             textPhrase += separator + str[i];
             help = 1;
         } else {
+
             textPhrase += str[i];
         }
         if (help === 1) {
             flagAdd = true;
         }
     }
-
+    // случай нечетнойй длины строки
     if (textPhrase.length % 2 !== 0) {
         if (textPhrase[textPhrase.length - 1] === 'Х') {
-            textPhrase += 'Ъ';
+            // вставка ь если последний символ - х 
+            textPhrase += 'Ь';
             isEnd = true;
             flagX = false;
         } else {
-            textPhrase += 'Ъ';
+            // вставка х в ином случае
+            textPhrase += 'Х';
             isEnd = true;
             flagX = true;
         }
@@ -535,61 +565,104 @@ function Playfaircipher() {
 
     var t = [];
     var enCodeStr = '';
+    // переход биграмм входного текста к биграммам выходного текста
     for (var i = 0; i < textPhrase.length; i += 2) {
         var pair1 = textPhrase[i];
         var pair2 = textPhrase[i + 1];
         var p1i, p1j, p2i, p2j;
+        //  нахождение индексов букв в новом алфавите
         for (var stroka = 0; stroka < keyresult.length; stroka++) {
             for (var stolbec = 0; stolbec < keyresult[stroka].length; stolbec++) {
                 if (keyresult[stroka][stolbec] == pair1) {
+                    console.log(`${keyresult[stroka][stolbec]} == ${pair1}`)
                     p1i = stroka;
                     p1j = stolbec;
+                    console.log(`p1i = ${stroka}; p1j = ${stolbec}`)
                 }
                 if (keyresult[stroka][stolbec] == pair2) {
+                    console.log(`${keyresult[stroka][stolbec]} == ${pair2}`)
                     p2i = stroka;
                     p2j = stolbec;
+                    console.log(`p2i = ${stroka}; p2j = ${stolbec}`)
                 }
             }
         }
         console.log(keyresult)
-        console.log(pair1)
-        console.log(p1i)
+        console.log(pair1, p1i, p1j)
+        console.log(pair2, p2i, p2j)
         console.log(p1j)
         var coord1 = '',
             coord2 = '';
-
+        // случай, когда буквы находятся в одной строке
         if (p1i === p2i) {
-            if (p1j === 5) {
+            console.log(`p1i = p2i`)
+                // если первая буква находится в последнем столбце, переходит в первый
+            if (p1j === 6) {
                 coord1 = keyresult[p1i][0];
+                console.log(`p1j = 6`)
+                console.log(`coord1 = ${keyresult[p1i][0]}`)
             } else {
-                coord1 = keyresult[p1i][p1j + 1];
+                // иначе сдвиг на +1 по модулю длины строки
+                coord1 = keyresult[p1i][(p1j + 1) % keyresult[p1i].length];
+                console.log(`p1j != 6`)
+                console.log(`coord1 = ${keyresult[p1i][(p1j + 1) % keyresult[p1i].length]}`)
             }
-            if (p2j === 5) {
+            // если вторая буква находится в последнем столбце, переходит в первый
+            if (p2j === 6) {
+                console.log(`p2j = 6`)
                 coord2 = keyresult[p2i][0];
+                console.log(`coord2 = ${keyresult[p2i][0]}`)
             } else {
-                coord2 = keyresult[p2i][p2j + 1]
+                console.log(`p2j != 6`)
+                    // иначе сдвиг на +1 по модулю длины строки
+                coord2 = keyresult[p2i][(p2j + 1) % keyresult[p2i].length]
+                console.log(`coord2 = ${keyresult[p2i][(p2j + 1) % keyresult[p2i].length]}`)
             }
         }
+        // случай, когда буквы находятся в одном столбце
         if (p1j === p2j) {
+            console.log(`p1j = p2j`)
+                // если первая буква находится в последней строке, переходит в первую
             if (p1i === 5) {
+                console.log(`p1i = 5`)
+                console.log(`coord1 = ${keyresult[0][p1j]}`)
                 coord1 = keyresult[0][p1j];
             } else {
-                coord1 = keyresult[p1i + 1][p1j];
+                // иначе сдвиг на +1 по модулю количества строк
+                console.log(`p1i != 5`)
+                console.log(`coord1 = ${keyresult[(p1i + 1) % keyresult.length][p1j]}`)
+                coord1 = keyresult[(p1i + 1) % keyresult.length][p1j];
             }
             if (p2i === 5) {
+                // если вторая буква находится в последней строке, переходит в первую
+                console.log(`p2i = 5`)
+                console.log(`p2i = ${keyresult[0][p2j]}`)
                 coord2 = keyresult[0][p2j];
             } else {
-                coord2 = keyresult[p2i + 1][p2j]
+                // иначе сдвиг на +1 по модулю количества строк
+                console.log(`p2i != 5`)
+                console.log(`p2i = ${keyresult[(p2i + 1) % keyresult.length][p2j]}`)
+                coord2 = keyresult[(p2i + 1) % keyresult.length][p2j]
             }
         }
+        // случай, когда буквы не имеют общих строк и столбцов
         if (p1i !== p2i && p1j !== p2j) {
+            // индекс столбца первой буквы, меняется на индекс столбца второй буквы
+            // индекс столбца второй буквы, меняется на индекс столбца первой буквы
+            console.log(`p1i !== p2i && p1j !== p2j`)
+            console.log(`p1i !== p2i && p1j !== p2j`)
+            console.log(`coord1 = ${keyresult[p1i][p2j]}`)
+            console.log(`coord2 = ${keyresult[p2i][p1j]}`)
             coord1 = keyresult[p1i][p2j];
             coord2 = keyresult[p2i][p1j];
         }
         enCodeStr = enCodeStr + coord1 + coord2;
     }
-    document.getElementById("lab3_2_enc").value = enCodeStr;
-    // alert("Добавили букву в середине слова? - " + flagAdd);
+    document.getElementById("lab3_2_enc").value = enCodeStr.toLocaleLowerCase();
+    alert(enCodeStr)
+    console.log(enCodeStr)
+    console.log('!!!')
+        // alert("Добавили букву в середине слова? - " + flagAdd);
     return enCodeStr;
 }
 
@@ -602,12 +675,14 @@ function deCodeCipher() {
         alert(error);
     }
     var keyresult = processKey();
+    // переход биграмм выходного текста к биграммам изначального текста
     for (var i = 0; i < text1.length; i += 2) {
         var pair1 = text1[i];
         var pair2 = text1[i + 1];
         var p1i, p1j, p2i, p2j;
-        for (var stroka = 0; stroka < keyresult.length; stroka++) {
-            for (var stolbec = 0; stolbec < keyresult[stroka].length; stolbec++) {
+        //  нахождение индексов букв в матрице
+        for (stroka = 0; stroka < keyresult.length; stroka++) {
+            for (stolbec = 0; stolbec < keyresult[stroka].length; stolbec++) {
                 if (keyresult[stroka][stolbec] == pair1) {
                     p1i = stroka;
                     p1j = stolbec;
@@ -620,48 +695,56 @@ function deCodeCipher() {
         }
         var coord1 = '',
             coord2 = '';
-
+        // случай, когда буквы находятся в одной строке
         if (p1i === p2i) {
+            // если первая буква в первом столбце, меняется на последний столбец, иначе сдвиг на -1 по модулю длины строки
             if (p1j === 0) {
-                coord1 = keyresult[p1i][5];
+                coord1 = keyresult[p1i][4];
             } else {
-                coord1 = keyresult[p1i][p1j - 1];
+                coord1 = keyresult[p1i][(keyresult[p1i].length + p1j - 1) % keyresult[p1i].length];
             }
+            // если вторая буква в первом столбце, меняется на последний столбец, иначе сдвиг на -1 по модулю длины строки
             if (p2j === 0) {
-                coord2 = keyresult[p2i][5];
+                coord2 = keyresult[p2i][4];
             } else {
-                coord2 = keyresult[p2i][p2j - 1]
+                coord2 = keyresult[p2i][(keyresult[p1i].length + p2j - 1) % keyresult[p2i].length]
             }
         }
+        // случай, когда буквы находятся в одном столбце
         if (p1j === p2j) {
+            // если первая буква в первой строке, меняется на последнюю строку, иначе сдвиг на -1 по модулю количества строк
             if (p1i === 0) {
                 coord1 = keyresult[5][p1j]
             } else {
-                coord1 = keyresult[p1i - 1][p1j];
+                coord1 = keyresult[(keyresult.length + p1i - 1) % keyresult.length][p1j];
             }
+            // если вторая буква в первой строке, меняется на последнюю строку, иначе сдвиг на -1 по модулю количества строк
             if (p2i === 0) {
                 coord2 = keyresult[5][p2j];
             } else {
-                coord2 = keyresult[p2i - 1][p2j]
+                coord2 = keyresult[(keyresult.length + p2i - 1) % keyresult.length][p2j]
             }
         }
+        // случай, когда буквы не имеют общих строк и столбцов
         if (p1i !== p2i && p1j !== p2j) {
+            // индекс столбца первой буквы, меняется на индекс столбца второй буквы
+            // индекс столбца второй буквы, меняется на индекс столбца первой буквы
             coord1 = keyresult[p1i][p2j];
             coord2 = keyresult[p2i][p1j];
         }
         text = text + coord1 + coord2;
     }
     text = text.split('');
-
+    // удаление сепараторов
     for (var i = 0; i < text.length; i++) {
         var count;
         if (flagAdd) {
-            if (text[i] === text[i + 2] && (text[i + 1] === 'Х' || text[i + 1] === 'Ъ')) {
+            if (text[i] === text[i + 2] && (text[i + 1] === 'Х' || text[i + 1] === 'Ь')) {
                 count = i + 1;
                 text.splice(count, 1);
             }
         } else if (flagAdd && isEnd && (flagX || !flagX)) {
-            if (text[i - 2] === text[i] && (text[i - 1] === 'Х' || text[i - 1] === 'Ъ'))
+            if (text[i - 2] === text[i] && (text[i - 1] === 'Х' || text[i - 1] === 'Ь'))
                 count = i + 1;
             text.splice(count, 1);
         } else if (!flagAdd) {
@@ -676,33 +759,40 @@ function deCodeCipher() {
     }
     text = text.join('');
     console.log(text);
-    document.getElementById('lab3_2_dec').innerHTML = text;
+    document.getElementById('lab3_2_dec').innerHTML = replaceBack(text.toLowerCase());
 }
 
 function VerticalCypher(msg, key) {
+    if (Number.isInteger(Number(key))) {
+
+
+    } else {
+        alert('Ключ должен быть числом')
+        return
+    }
     url = `${window.location.origin}` + '/lab4Enc' + `?msg=${msg}&key=${key}`;
-    //  console.log(url);
+
     sendRequest(url, 'GET', function() {
         console.log(this.response);
         encode_str = this.response;
         console.log(encode_str);
 
-        $('#lab4_1_enc').val(encode_str);
+        $('#lab4_1_enc').val(encode_str.replaceAll(`_`, ''));
         url = `${window.location.origin}` + '/lab4Dec' + `?msg=${encode_str}&key=${key}`;
         sendRequest(url, 'GET', function() {
             console.log(this.response);
             decode_str = this.response;
             console.log(decode_str);
 
-            $('#lab4_1_dec').val(decode_str);
+            $('#lab4_1_dec').val(replaceBack(decode_str));
 
         })
 
     })
 }
 
-function Cardan(msg) {
-    url = `${window.location.origin}` + '/lab4Enc1' + `?msg=${msg}`;
+function Cardan(msg, key) {
+    url = `${window.location.origin}` + '/lab4Enc1' + `?msg=${msg}&key=${key}`;
     sendRequest(url, 'GET', function() {
         console.log(this.response)
         $('#lab4_2_enc').val(this.response[0]);
@@ -716,7 +806,7 @@ function Shennon(msg) {
     url = `${window.location.origin}` + '/lab5shennon' + `?msg=${msg}`;
     sendRequest(url, 'GET', function() {
         console.log(this.response)
-        $('#lab5_1_enc').val(`${this.response[0][0]} \n ${this.response[0][1]}`);
+        $('#lab5_1_enc').val(`${this.response[0][0]} \n\nгамма(для ручного теста)  ${this.response[0][1]}`);
         $('#lab5_1_dec').val(this.response[1]);
     })
 }
@@ -732,31 +822,36 @@ function Gost89(msg) {
     })
 }
 
-function A51(msg) {
-    url = `${window.location.origin}` + '/lab6a51' + `?msg=${msg}`;
+function A51(msg, key) {
+    // проверка ключа
+    if (key.length == 64 && Number.isInteger(Number(key))) {} else {
+        alert('Ключ должен быть размером 64 бита')
+        return;
+    }
+    url = `${window.location.origin}` + '/lab6a51' + `?msg=${msg}&key=${key}`;
     sendRequest(url, 'GET', function() {
         console.log(this.response)
         $('#lab6_1_enc').val(this.response[0]);
-        $('#lab6_1_dec').val(this.response[1]);
+        $('#lab6_1_dec').val(replaceBack(this.response[1]));
 
     })
 }
 
-function Kuznechik(msg) {
-    url = `${window.location.origin}` + '/lab7kuznechik' + `?msg=${msg}`;
-    sendRequest(url, 'GET', function() {
-        console.log(this.response)
+// function Kuznechik(msg) {
+//     url = `${window.location.origin}` + '/lab7kuznechik' + `?msg=${msg}`;
+//     sendRequest(url, 'GET', function() {
+//         console.log(this.response)
 
-    })
-}
+//     })
+// }
 
 
-function Magma(msg) {
-    url = `${window.location.origin}` + '/lab7Magma' + `?msg=${msg}`;
+function Magma(msg, key) {
+    url = `${window.location.origin}` + '/lab7Magma' + `?msg=${msg}&key=${key}`;
     sendRequest(url, 'GET', function() {
         console.log(this.response)
         $('#lab7_2_enc').val(this.response[0]);
-        $('#lab7_2_dec').val(this.response[1]);
+        $('#lab7_2_dec').val(replaceBack(this.response[1]));
     })
 }
 
@@ -770,7 +865,7 @@ function RSA(msg, p, q) {
             return
         } else {
             $('#lab8_1_enc').val(this.response[0]);
-            $('#lab8_1_dec').val(this.response[1]);
+            $('#lab8_1_dec').val(replaceBack(this.response[1]));
         }
     })
 }
@@ -785,8 +880,19 @@ function DSRSA(msg, p, q) {
     })
 }
 
-function gost94(msg) {
-    url = `${window.location.origin}` + '/gost94' + `?msg=${msg}`;
+function gost94(msg, p, q, a, x, k) {
+    // проверка ключей на то, являются ли они числом
+    if (Number.isInteger(Number(p)) && Number.isInteger(Number(q)) && Number.isInteger(Number(a)) && Number.isInteger(Number(x)) && Number.isInteger(Number(k))) {
+        // проверка ключей на требование стандарта
+        if ((Number(p) - 1) % Number(q) == 0 && Number(a) > 1 && Number(a) < (p - 1) && Number(a) ** Number(q) % Number(p) == 1 && Number(x) < Number(q)) {} else {
+            alert('ключи заданы не по стандарту');
+            return;
+        }
+    } else {
+        alert('Ключи должны быть числами')
+        return;
+    }
+    url = `${window.location.origin}` + '/gost94' + `?msg=${msg}` + `&p=${p}` + `&q=${q}` + `&a=${a}` + `&x=${x}` + `&k=${k}`;
     sendRequest(url, 'GET', function() {
         console.log(this.response)
         $('#lab10_1_1').val(this.response[0]);
