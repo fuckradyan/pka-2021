@@ -562,6 +562,7 @@ def lab6a51():
         i = 0
         for i in plain:
             binary = str(' '.join(format(ord(x), 'b') for x in i))
+            print(binary)
             j = len(binary)
             while(j < 12):
                 binary = "0" + binary
@@ -571,6 +572,7 @@ def lab6a51():
         k = 0
         while(k < len(s)):
             binary_values.insert(k, int(s[k]))
+            
             k = k + 1
         return binary_values
 
@@ -581,7 +583,7 @@ def lab6a51():
         else:
             return 0
 
-
+    # функция вычисления ключевого потока
     def get_keystream(length):
         reg_x_temp = copy.deepcopy(reg_x)
         reg_y_temp = copy.deepcopy(reg_y)
@@ -639,25 +641,30 @@ def lab6a51():
             i = i + 12
         return str(s)
 
-
+    # функция шифрования
     def encode(plain):
         s = ""
         binary = to_binary(plain)
+        # вычисление ключевого потока
         keystream = get_keystream(len(binary))
         i = 0
         while(i < len(binary)):
+            # XOR текста и ключевого потока
             s = s + str(binary[i] ^ keystream[i])
+            print( str(binary[i]) + '^' + str(keystream[i]))
             i = i + 1
         return s
 
-
+    # функция расшифровки
     def decode(cipher):
         s = ""
         binary = []
+        # вычисление ключевого потока
         keystream = get_keystream(len(cipher))
         i = 0
         while(i < len(cipher)):
             binary.insert(i, int(cipher[i]))
+            # XOR зашифрованного текста и ключевого потока
             s = s + str(binary[i] ^ keystream[i])
             i = i + 1
         return convert_binary_to_str(str(s))
@@ -674,7 +681,7 @@ def lab7():
 
 @app.route('/lab7Magma', methods=['GET'])
 def lab7Magma():
-    # импорт компонентов, необходимых для работы программы
+    # таблицы перестановок (взяты из ГОСТ)
     pi0 = [12, 4, 6, 2, 10, 5, 11, 9, 14, 8, 13, 7, 0, 3, 15, 1]
     pi1 = [6, 8, 2, 3, 9, 10, 5, 12, 1, 14, 4, 7, 11, 13, 0, 15]
     pi2 = [11, 3, 5, 8, 2, 15, 10, 13, 14, 1, 7, 4, 12, 9, 6, 0]
@@ -687,49 +694,67 @@ def lab7Magma():
     MASK32 = 2 ** 32 - 1
     prekey = request.args.get('key')
     to_encrypt = request.args.get('msg')
+    # функция для деления 32-битного числа на восемь 4-битных
     def t(x):
         y = 0
         for i in reversed(range(8)):
             j = (x >> 4 * i) & 0xf
             y <<= 4
+            # преобразование числа в другое 4-битное число с использованием таблицы перестановки
             y ^= pi[i][j]
         return y
     # функция сдвига на 11
     def rot11(x):
         return ((x << 11) ^ (x >> (32 - 11))) & MASK32
+    # функция преображения, основанная на сети Фейстеля
     def g(x, k):
         return rot11(t((x + k) % 2 ** 32))
+    # функция деления блока на 2
     def split(x):
         L = x >> 32
         R = x & MASK32
         return (L, R)
     def join(L, R):
         return (L << 32) ^ R
+    # функция получения итерационных ключей из исходного 256-битного ключа
     def magma_key_schedule(k):
         keys = []
         for i in reversed(range(8)):
+
             keys.append((k >> (32 * i)) & MASK32)
+
         for i in range(8):
             keys.append(keys[i])
+            print('k-',i+9,'=',hex(keys[i]))
         for i in range(8):
             keys.append(keys[i])
+            print('k',i+17,'=',hex(keys[i]))
         for i in reversed(range(8)):
             keys.append(keys[i])
+            print('k',32-i,'=',hex(keys[i]))
         return keys
     # функция шифрования
     def magma_encrypt(x, k):
         keys = magma_key_schedule(k)
+        # деление блока на 2 части
         (L, R) = split(x)
+        # итерации 1-31
         for i in range(31):
             (L, R) = (R, L ^ g(R, keys[i]))
+            print('L-',i,' = ', hex(L),'; R-',i, hex(R))
+        # 32-ая итерация (результат пишется в левую часть исходного блока,правая половина сохраняет значение)
         return join(L ^ g(R, keys[-1]), R)
     # функция расшифрования
     def magma_decrypt(x, k):
         keys = magma_key_schedule(k)
         keys.reverse()
+        # деление блока на 2 части
         (L, R) = split(x)
+        # итерации 1-31
         for i in range(31):
             (L, R) = (R, L ^ g(R, keys[i]))
+            
+        # 32-ая итерация (результат пишется в левую часть исходного блока,правая половина сохраняет значение)
         return join(L ^ g(R, keys[-1]), R)
     # установка ключа
     key = int(str(prekey), 16)
@@ -737,10 +762,12 @@ def lab7Magma():
     text_short = to_encrypt
     encr_short = []
     while (i < len(text_short)):
+        # перевод сообщения в шестнадцатеричный формат
         text = text_short[i:i+4].encode().hex()
         text = int(text, 16)
         text = text % 2**64
         pt = text
+        # запуск функции шифрования
         ct = magma_encrypt(pt, key)
         encr_short.append(ct)
         i += 4
@@ -748,6 +775,9 @@ def lab7Magma():
     for i in encr_short:
         dt = magma_decrypt(i, key)
         decr_short.append(bytes.fromhex(hex(dt)[2::]).decode('utf-8'))
+    # print(hex(t(int('0xfdb97531', 16))))
+    print(hex(magma_encrypt(int('fedcba9876543210', 16), key)), '\n',
+        magma_encrypt(int('fedcba9876543210', 16), key) == int('4ee901e5c2d8ca3d', 16))
     return jsonify(encr_short, ''.join(decr_short))
 
 
@@ -763,10 +793,9 @@ def lab8rsa():
         while b != 0:
             a, b = b, a % b
         return a
-
+    # функция вычисления d, d -  мультипликативно обратное к числу e по модулю phi
     def multiplicative_inverse(e,r):
         for i in range(r):
-            print('(e*i) разд на r == 1', (e*i)%r)
             if((e*i)%r == 1):
                 return i
     # Ф-ия определения простоты
@@ -787,27 +816,31 @@ def lab8rsa():
             return jsonify('p и q не могут быть равны')
         #n = pq
         n = p * q
-
+        # ф-ия эйлера от произв. p и q
         phi = (p-1) * (q-1)
-
+        # е - случайное целое число, взаимно простое с phi
         e = random.randrange(1, phi)
 
         g = gcd(e, phi)
+        # в случае, если число не взаимно простое, программа будет 
+        # запускать эту часть и генерировать новое е, пока условие не будет выполнено
         while g != 1:
-            print('g', g)
             e = random.randrange(1, phi)
             g = gcd(e, phi)
         d = multiplicative_inverse(e, phi)
         print('d',d)
+        # возврат пар ключей: открытой и закрытой
+        print(e,n,d,n)
         return ((e, n), (d, n))
-    # шифрование
+    # функция шифрования
     def encrypt(pk, plaintext):
         key, n = pk
         # шифртекст  получается последовательным шифрованием каждой шифрвеличины Mi возведением ее в степень E по модулю N: 
         # Ci = Mi^E MOD N
         cipher = [(ord(char) ** key) % n for char in plaintext]
+        print(cipher)
         return cipher
-    # расшифровка
+    # функция расшифрования
     def decrypt(pk, ciphertext):
         key, n = pk
         # расшифровывание сообщения, возводя последовательно Сi в степень D по модулю N:
@@ -815,13 +848,16 @@ def lab8rsa():
         plain = [chr((char ** key) % n) for char in ciphertext]
         return ''.join(plain)
     try:
+        # получение сообщения, p и q
         message = request.args.get('msg')
         p = int(request.args.get('p'))
         q = int(request.args.get('q'))
+        # генерация пар ключей
         public, private = generate_keypair(p, q)
         print("Публичный ключ: ", public ,"Секретный ключ: ", private)
+        # запуск функции шифрования
         encrypted_msg = encrypt(public, message)
-        return jsonify(''.join([str(x) for x in encrypted_msg]),decrypt(private, encrypted_msg))
+        return jsonify(encrypted_msg, decrypt(private, encrypted_msg))
     except:
         return jsonify('Ошибка.')
     
@@ -838,7 +874,7 @@ def lab9dsrsa():
                   'п':15, 'р':16, 'с':17, 'т':18, 'у':19,
                   'ф':20, 'х':21, 'ц':22, 'ч':23, 'ш':24,
                   'щ':25, 'ъ':26, 'ы':27, 'ь':28, 'э':29,
-                  'ю':30, 'я':31, ' ':32, ",":33, ".":34,
+                  'ю':30, 'я':31, ' ':32
                   }
 
     #проверка на простое число
@@ -847,7 +883,7 @@ def lab9dsrsa():
         while n % d != 0:
             d += 1
         return d == n
-    #расширенный алгоритм Евклида или (e**-1) mod fe
+    #функция вычисления d
     def modInverse(e,el):
         e = e % el
         for x in range(1,el):
@@ -856,20 +892,29 @@ def lab9dsrsa():
         return 1
 
     #инициализация p,q,e,n
+    
     p = int(request.args.get('p'))
     print('p - простое число: ',IsPrime(p))
     
     q = int(request.args.get('q'))
     print('q - простое число:',IsPrime(q))
+    # проверка ключей
+    if IsPrime(q) and IsPrime(p) and p!=q:
+        print('aight')
+    else:
+        print('p и q должны быть простыми')
+        return False
     n = p * q
     print("N =",n)
     el = (p-1) * (q-1)
     print("El =",el)
     e = random.randrange(1, el)
+    # НОД
     while gcd(e,el) != 1:
         e = random.randrange(1, el)
         gcd(e, el)
     print("E =",e)
+    
     if gcd(e,el) == 1:
         print("E подходит")
     else:
@@ -884,8 +929,10 @@ def lab9dsrsa():
     msg = request.args.get('msg')
     msg_list = list(msg)
     alpha_code_msg = list()
+    # запись индексов букв в массив
     for i in range(len(msg_list)):
         alpha_code_msg.append(int(alphabet_lower.get(msg_list[i])))
+    print(alpha_code_msg)
     print("Длина исходного сообщения {} символов".format(len(alpha_code_msg)))
     # функция хэширования
     def hash_value(n,alpha_code):
@@ -893,6 +940,7 @@ def lab9dsrsa():
         hashing_value = 1
         while i < len(alpha_code_msg):
             hashing_value = (((hashing_value-1) + int(alpha_code_msg[i]))**2) % n
+            print('(', hashing_value, '-1', '+',int(alpha_code_msg[i]),')','**2 %',n,'=', hashing_value)
             i += 1
             print ('Значение хэша №{}'.format(i),hashing_value)
         return hashing_value
@@ -900,13 +948,14 @@ def lab9dsrsa():
     hash_code_msg = hash_value(n, alpha_code_msg)
     print("Хэш сообщения", hash_code_msg)
     #подпись сообщения s=Sa(m) = m^d mod n
-    def signature_msg(hash_code,n,d):
+    def signature_msg(hash_code,n,d): 
         sign = (hash_code**d)%n
         return sign
 
     sign_msg = signature_msg(hash_code_msg,n,d)
     print("Значение подписи: {}".format(sign_msg))
     #передаём пару m,s
+    #проверка подписи
     def check_signature(sign_msg, n,e):
         check = (sign_msg**e) % n
         return check

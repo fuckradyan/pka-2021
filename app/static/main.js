@@ -414,7 +414,7 @@ window.onload = function() {
         Magma(prepare($('#lab7_2_mes').val()), $('#lab7_2_key').val());
     });
     $('#lab8_1').click(function() {
-        RSA(prepare($('#lab8_1_mes').val()), $('#lab8_1_p').val(), $('#lab8_1_q').val());
+        RSA(prepare($('#lab8_1_mes').val()).replaceAll(' ', ''), $('#lab8_1_p').val(), $('#lab8_1_q').val());
     });
     $('#lab9_1').click(function() {
         DSRSA(prepare($('#lab9_1_mes').val()), $('#lab9_1_p').val(), $('#lab9_1_q').val());
@@ -824,8 +824,8 @@ function Gost89(msg) {
 
 function A51(msg, key) {
     // проверка ключа
-    if (key.length == 64 && Number.isInteger(Number(key))) {} else {
-        alert('Ключ должен быть размером 64 бита')
+    if (key.length == 64 && key.match(/^([01])+/)[0].length == 64) {} else {
+        alert('Ключ должен быть размером 64 бита и содержать только 0 и 1')
         return;
     }
     url = `${window.location.origin}` + '/lab6a51' + `?msg=${msg}&key=${key}`;
@@ -877,6 +877,11 @@ function DSRSA(msg, p, q) {
         $('#lab9_1_1').val(this.response[0]);
         $('#lab9_1_2').val(this.response[1]);
         $('#lab9_1_3').val(this.response[2]);
+        if (this.response[0] == this.response[2]) {
+            alert('Подпись верна')
+        } else {
+            alert('Подпись не верна')
+        }
     })
 }
 
